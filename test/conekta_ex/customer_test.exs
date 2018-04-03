@@ -1,10 +1,19 @@
 defmodule ConektaEx.CustomerTest do
   use ExUnit.Case
-  alias ConektaEx.{Error, Customer, StructList}
+  alias ConektaEx.Error
+  alias ConektaEx.Customer
+  alias ConektaEx.StructList
+  alias ConektaEx.PaymentSource
 
   @valid_params %{
     name: "luis",
-    email: "luis@luis.com"
+    email: "luis@luis.com",
+    payment_sources: [
+      %{
+        token_id: "tok_test_visa_4242",
+        type: "card"
+      }
+    ]
   }
 
   @invalid_params %{
@@ -13,6 +22,9 @@ defmodule ConektaEx.CustomerTest do
 
   setup do
     assert {:ok, customer} = Customer.create(@valid_params)
+    ps = customer.payment_sources
+    assert ps.object == "list"
+    assert is_list(ps.data)
     {:ok, customer: customer}
   end
 
@@ -108,6 +120,54 @@ defmodule ConektaEx.CustomerTest do
 
   test "delete/1 returns {:error, err} with invalid id" do
     assert {:error, %Error{} = e} = Customer.delete("invalid_id")
+    assert e.object == "error"
+    assert e.type == "resource_not_found_error"
+  end
+
+  test "create_payment_source/3 returns {:ok, source} with valid params", %{customer: c} do
+    assert {:ok, %PaymentSource{} = src} =
+             Customer.create_payment_source(c.id, "card", "tok_test_visa_4242")
+
+    assert src.brand == "VISA"
+    assert src.object == "payment_source"
+    assert src.type == "card"
+  end
+
+  test "create_payment_source/3 returns {:error, error} with valid params", %{customer: c} do
+    assert {:error, %Error{} = e} = Customer.create_payment_source(c.id, "card", "token")
+    assert e.object == "error"
+    assert e.type == "parameter_validation_error"
+  end
+
+  test "update_payment_source/3 returns {:ok, source} with valid params", %{customer: c} do
+    ps_id = c.payment_sources.data |> Enum.at(0) |> Map.get(:id)
+    attrs = %{exp_month: "1", name: "new name"}
+    assert {:ok, %PaymentSource{} = src} = Customer.update_payment_source(c.id, ps_id, attrs)
+    assert src.brand == "VISA"
+    assert src.object == "payment_source"
+    assert src.type == "card"
+    assert src.name == "new name"
+    assert src.exp_month == "1"
+  end
+
+  test "update_payment_source/3 returns {:error, error} with valid params", %{customer: c} do
+    ps_id = c.payment_sources.data |> Enum.at(0) |> Map.get(:id)
+    attrs = %{exp_month: 32}
+    assert {:error, %Error{} = e} = Customer.update_payment_source(c.id, ps_id, attrs)
+    assert e.object == "error"
+    assert e.type == "parameter_validation_error"
+  end
+
+  test "delete_payment_source/2 returns {:ok, source} with valid params", %{customer: c} do
+    ps_id = c.payment_sources.data |> Enum.at(0) |> Map.get(:id)
+    assert {:ok, %PaymentSource{} = src} = Customer.delete_payment_source(c.id, ps_id)
+    assert src.brand == "VISA"
+    assert src.object == "payment_source"
+    assert src.type == "card"
+  end
+
+  test "delete_payment_source/1 returns {:error, error} with valid params", %{customer: c} do
+    assert {:error, %Error{} = e} = Customer.delete_payment_source(c.id, "source_id")
     assert e.object == "error"
     assert e.type == "resource_not_found_error"
   end

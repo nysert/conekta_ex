@@ -30,7 +30,7 @@ defmodule ConektaEx.Customer do
   def list() do
     @endpoint
     |> HTTPClient.get()
-    |> parse_list_response()
+    |> parse_response(:customer_list)
   end
 
   @doc ~S"""
@@ -41,7 +41,7 @@ defmodule ConektaEx.Customer do
   def next_page(struct_list, limit \\ nil) do
     struct_list
     |> StructList.request_next(limit)
-    |> parse_list_response()
+    |> parse_response(:customer_list)
   end
 
   @doc ~S"""
@@ -52,7 +52,7 @@ defmodule ConektaEx.Customer do
   def previous_page(struct_list, limit \\ nil) do
     struct_list
     |> StructList.request_previous(limit)
-    |> parse_list_response()
+    |> parse_response(:customer_list)
   end
 
   @doc ~S"""
@@ -128,17 +128,83 @@ defmodule ConektaEx.Customer do
     |> parse_response()
   end
 
-  defp parse_response({:error, res}), do: {:error, res}
+  @doc ~S"""
+  Creates a payment source for a customer with a customer_id.
+
+  ## Examples
+
+      iex> create_payment_source(customer_id, "card", ok_token)
+      {:ok, %ConektaEx.Customer{}}
+
+      iex> create_payment_source(customer_id, "card", bad_token)
+      {:error, %ConektaEx.Error{}}
+  """
+  def create_payment_source(customer_id, type, token_id)
+      when is_binary(customer_id) do
+    body = Poison.encode!(%{type: type, token_id: token_id})
+
+    "#{@endpoint}/#{customer_id}/payment_sources/"
+    |> HTTPClient.post(body)
+    |> parse_response(:payment_source)
+  end
+
+  @doc ~S"""
+  Updates a payment source for a customer with a customer_id.
+
+  ## Examples
+
+      iex> update_payment_source(customer_id, ok_attrs)
+      {:ok, %ConektaEx.Customer{}}
+
+      iex> update_payment_source(customer_id, bad_attrs)
+      {:error, %ConektaEx.Error{}}
+  """
+  def update_payment_source(customer_id, source_id, attrs)
+      when is_binary(customer_id) and is_binary(source_id) and is_map(attrs) do
+    body = Poison.encode!(attrs)
+
+    "#{@endpoint}/#{customer_id}/payment_sources/#{source_id}"
+    |> HTTPClient.put(body)
+    |> parse_response(:payment_source)
+  end
+
+  @doc ~S"""
+  Deletes a payment source for a customer with a customer_id.
+
+  ## Examples
+
+      iex> delete(customer_id, ok_source_id)
+      {:ok, %ConektaEx.Customer{}}
+
+      iex> delete(customer_id, bad_source_id)
+      {:error, %ConektaEx.Error{}}
+  """
+  def delete_payment_source(customer_id, source_id)
+      when is_binary(customer_id) and is_binary(source_id) do
+    "#{@endpoint}/#{customer_id}/payment_sources/#{source_id}"
+    |> HTTPClient.delete()
+    |> parse_response(:payment_source)
+  end
+
+  defp parse_response({:error, res}) do
+    {:error, res}
+  end
 
   defp parse_response({:ok, res}) do
     {:ok, Poison.decode!(res.body, as: response())}
   end
 
-  defp parse_list_response({:error, res}), do: {:error, res}
+  defp parse_response({:error, res}, _) do
+    {:error, res}
+  end
 
-  defp parse_list_response({:ok, res}) do
-    res_struct = %StructList{data: [response()]}
-    {:ok, Poison.decode!(res.body, as: res_struct)}
+  defp parse_response({:ok, res}, :customer_list) do
+    struct = %StructList{data: [response()]}
+    {:ok, Poison.decode!(res.body, as: struct)}
+  end
+
+  defp parse_response({:ok, res}, :payment_source) do
+    {:ok, Poison.decode!(res.body, as: %PaymentSource{})}
   end
 
   defp response() do
