@@ -7,6 +7,8 @@ defmodule ConektaEx.Order do
   alias ConektaEx.ShippingContact
   alias ConektaEx.Address
   alias ConektaEx.Customer
+  alias ConektaEx.Charge
+  alias ConektaEx.PaymentSource
   alias ConektaEx.HTTPClient
 
   @endpoint "/orders"
@@ -113,14 +115,31 @@ defmodule ConektaEx.Order do
       when is_binary(order_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
-    "#{@endpoint}/#{order_id}"
+    "#{@endpoint}/#{order_id}/charges"
     |> HTTPClient.put(body)
     |> parse_response()
   end
 
   @doc ~S"""
-  Refounds an order with order_id and adding
-  reason and amount if provided
+  Captures an order with order_id
+
+  ## Examples
+
+      iex> capture(ok_order_id)
+      {:ok, %ConektaEx.Order{}}
+
+      iex> capture(bad_order_id)
+      {:error, %ConektaEx.Error{}}
+  """
+  def capture(order_id) when is_binary(order_id) do
+    "#{@endpoint}/#{order_id}/capture"
+    |> HTTPClient.post("")
+    |> parse_response()
+  end
+
+  @doc ~S"""
+  Refunds an order with order_id, adding reason and
+  amount if provided
 
   ## Examples
 
@@ -131,7 +150,7 @@ defmodule ConektaEx.Order do
       {:error, %ConektaEx.Error{}}
   """
   def refund(order_id, reason, amount \\ nil)
-      when is_binary order_id do
+      when is_binary(order_id) do
     body =
       amount
       |> case do
@@ -140,6 +159,26 @@ defmodule ConektaEx.Order do
       end
       |> Map.put(:reason, reason)
       |> Poison.encode!()
+
+    "#{@endpoint}/#{order_id}/refunds"
+    |> HTTPClient.post(body)
+    |> parse_response()
+  end
+
+  @doc ~S"""
+  Creates a charge for an order with order_id
+
+  ## Examples
+
+      iex> refund(order_id, ok_attrs)
+      {:ok, %ConektaEx.Order{}}
+
+      iex> refund(order_id, bad_attrs)
+      {:error, %ConektaEx.Error{}}
+  """
+  def create_charge(order_id, attrs)
+      when is_binary(order_id) and is_map(attrs) do
+    body = Poison.encode!(attrs)
 
     "#{@endpoint}/#{order_id}/refunds"
     |> HTTPClient.post(body)
@@ -176,7 +215,12 @@ defmodule ConektaEx.Order do
       shipping_contact: %ShippingContact{
         address: %Address{}
       },
-      customer_info: %Customer{}
+      customer_info: %Customer{},
+      charges: %StructList{
+        data: [
+          %Charge{payment_method: %PaymentSource{}}
+        ]
+      }
     }
   end
 end
