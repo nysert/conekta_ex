@@ -17,7 +17,7 @@ defmodule ConektaEx.Customer do
     :payment_sources,
     :corporate,
     :shipping_contacts,
-    :subscriptions,
+    :subscription,
     :object,
     :livemode,
     :default_shipping_contact_id,
@@ -186,6 +186,177 @@ defmodule ConektaEx.Customer do
     |> parse_response(:payment_source)
   end
 
+  @doc ~S"""
+  Creates a shipping contact for a customer with customer_id
+
+  ## Examples
+
+      iex> create_shipping_contact(customer_id, ok_attrs)
+      {:ok, %ConektaEx.ShippingContact{}}
+
+      iex> create_shipping_contact(customer_id, bad_attrs)
+      {:error, %ConektaEx.Error{}}
+  """
+  def create_shipping_contact(customer_id, attrs)
+      when is_binary(customer_id) and is_map(attrs) do
+    body = Poison.encode!(attrs)
+
+    "#{@endpoint}/#{customer_id}/shipping_contacts"
+    |> HTTPClient.post(body)
+    |> parse_response(:shipping_contact)
+  end
+
+  @doc ~S"""
+  Updates a shipping contact for a customer with customer_id and contact_id
+  ## Examples
+
+      iex> update_shipping_contact(customer_id, contact_id, ok_attrs)
+      {:ok, %ConektaEx.ShippingContact{}}
+
+      iex> update_shipping_contact(customer_id, contact_id, bad_attrs)
+      {:error, %ConektaEx.Error{}}
+  """
+  def update_shipping_contact(customer_id, contact_id, attrs)
+      when is_binary(customer_id) and is_binary(contact_id) and is_map(attrs) do
+    body = Poison.encode!(attrs)
+
+    "#{@endpoint}/#{customer_id}/shipping_contacts/#{contact_id}"
+    |> HTTPClient.put(body)
+    |> parse_response(:shipping_contact)
+  end
+
+  @doc ~S"""
+  Deletes a shipping contact for a customer with customer_id and contact_id
+
+  ## Examples
+
+      iex> delete_shipping_contact(customer_id, contact_id)
+      {:ok, %ConektaEx.ShippingContact{}}
+
+      iex> delete_shipping_contact(customer_id, bad_line_id)
+      {:error, %ConektaEx.Error{}}
+  """
+  def delete_shipping_contact(customer_id, contact_id)
+      when is_binary(customer_id) and is_binary(contact_id) do
+    "#{@endpoint}/#{customer_id}/shipping_contacts/#{contact_id}"
+    |> HTTPClient.delete()
+    |> parse_response(:shipping_contact)
+  end
+
+  @doc ~S"""
+  Creates a subscription for a customer with customer_id,
+  plan_id and card_id if proivded.
+
+  ## Examples
+
+      iex> create_subscription(customer_id, ok_plan_id)
+      {:ok, %ConektaEx.Subscription{}}
+
+      iex> create_subscription(customer_id, bad_plan_id)
+      {:error, %ConektaEx.Error{}}
+  """
+  def create_subscription(customer_id, plan_id, card_id \\ nil)
+      when is_binary(customer_id) and is_binary(plan_id) do
+    body =
+      case card_id do
+        nil -> %{}
+        c_id -> Map.put(%{}, :card, c_id)
+      end
+      |> Map.put(:plan, plan_id)
+      |> Poison.encode!()
+
+    "#{@endpoint}/#{customer_id}/subscription"
+    |> HTTPClient.post(body)
+    |> parse_response(:subscription)
+  end
+
+  @doc ~S"""
+  Updates a subscription for a customer with customer_id,
+  plan_id and card_id if proivded.
+
+  ## Examples
+
+      iex> update_subscription(customer_id, plan_id, ok_attrs)
+      {:ok, %ConektaEx.Subscription{}}
+
+      iex> update_subscription(customer_id, plan_id, bad_attrs)
+      {:error, %ConektaEx.Error{}}
+  """
+  def update_subscription(customer_id, plan_id, card_id \\ nil)
+      when is_binary(customer_id) and is_binary(plan_id) do
+    body =
+      case card_id do
+        nil -> %{}
+        c_id -> Map.put(%{}, :card, c_id)
+      end
+      |> Map.put(:plan, plan_id)
+      |> Poison.encode!()
+
+    "#{@endpoint}/#{customer_id}/subscription"
+    |> HTTPClient.put(body)
+    |> parse_response(:subscription)
+  end
+
+  @doc ~S"""
+  Pauses a subscription with subscription_id for a customer_id
+
+  ## Examples
+
+      iex> pause_subscription(customer_id, ok_subscription_id)
+      {:ok, %ConektaEx.Subscription{}}
+
+      iex> pause_subscription(customer_id, bad_subscription_id)
+      {:error, %ConektaEx.Error{}}
+  """
+  def pause_subscription(customer_id, subscription_id)
+      when is_binary(customer_id) and is_binary(subscription_id) do
+    body = Poison.encode!(%{id: subscription_id})
+
+    "#{@endpoint}/#{customer_id}/subscription/pause"
+    |> HTTPClient.post(body)
+    |> parse_response(:subscription)
+  end
+
+  @doc ~S"""
+  Resumes a subscription with subscription_id for a customer_id
+
+  ## Examples
+
+      iex> resume_subscription(customer_id, ok_subscription_id)
+      {:ok, %ConektaEx.Subscription{}}
+
+      iex> resume_subscription(customer_id, bad_subscription_id)
+      {:error, %ConektaEx.Error{}}
+  """
+  def resume_subscription(customer_id, subscription_id)
+      when is_binary(customer_id) and is_binary(subscription_id) do
+    body = Poison.encode!(%{id: subscription_id})
+
+    "#{@endpoint}/#{customer_id}/subscription/resume"
+    |> HTTPClient.post(body)
+    |> parse_response(:subscription)
+  end
+
+  @doc ~S"""
+  Cancels a subscription with subscription_id for a customer_id
+
+  ## Examples
+
+      iex> cancel_subscription(customer_id, ok_subscription_id)
+      {:ok, %ConektaEx.Subscription{}}
+
+      iex> cancel_subscription(customer_id, bad_subscription_id)
+      {:error, %ConektaEx.Error{}}
+  """
+  def cancel_subscription(customer_id, subscription_id)
+      when is_binary(customer_id) and is_binary(subscription_id) do
+    body = Poison.encode!(%{id: subscription_id})
+
+    "#{@endpoint}/#{customer_id}/subscription/cancel"
+    |> HTTPClient.post(body)
+    |> parse_response(:subscription)
+  end
+
   defp parse_response({:error, res}) do
     {:error, res}
   end
@@ -207,6 +378,15 @@ defmodule ConektaEx.Customer do
     {:ok, Poison.decode!(res.body, as: %PaymentSource{})}
   end
 
+  defp parse_response({:ok, res}, :shipping_contact) do
+    struct = %ShippingContact{address: %Address{}}
+    {:ok, Poison.decode!(res.body, as: struct)}
+  end
+
+  defp parse_response({:ok, res}, :subscription) do
+    {:ok, Poison.decode!(res.body, as: %Subscription{})}
+  end
+
   defp response() do
     %__MODULE__{
       payment_sources: %StructList{
@@ -215,9 +395,7 @@ defmodule ConektaEx.Customer do
       shipping_contacts: %StructList{
         data: [%ShippingContact{address: %Address{}}]
       },
-      subscriptions: %StructList{
-        data: [%Subscription{}]
-      }
+      subscription: %Subscription{}
     }
   end
 end

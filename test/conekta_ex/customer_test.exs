@@ -4,6 +4,24 @@ defmodule ConektaEx.CustomerTest do
   alias ConektaEx.Customer
   alias ConektaEx.StructList
   alias ConektaEx.PaymentSource
+  alias ConektaEx.Subscription
+  alias ConektaEx.ShippingContact
+
+  @shipping_contact %{
+    address: %{
+      city: "Ciudad de Mexico",
+      country: "mx",
+      object: "shipping_address",
+      postal_code: "78215",
+      residential: true,
+      state: "Ciudad de Mexico",
+      street1: "Nuevo Leon 4",
+      street2: "nuevo leon 5"
+    },
+    between_streets: "Campeche y Morelos",
+    phone: "+52000000000000",
+    receiver: "Mario perez"
+  }
 
   @valid_params %{
     name: "luis",
@@ -13,6 +31,9 @@ defmodule ConektaEx.CustomerTest do
         token_id: "tok_test_visa_4242",
         type: "card"
       }
+    ],
+    shipping_contacts: [
+      @shipping_contact
     ]
   }
 
@@ -171,4 +192,163 @@ defmodule ConektaEx.CustomerTest do
     assert e.object == "error"
     assert e.type == "resource_not_found_error"
   end
+
+  test "create_shipping_contact/3 returns {:ok, source} with valid params", %{customer: c} do
+    assert {:ok, %ShippingContact{} = shp} =
+             Customer.create_shipping_contact(c.id, @shipping_contact)
+
+    assert shp.phone == "+52000000000000"
+    assert shp.receiver == "Mario perez"
+  end
+
+  test "create_shipping_contact/3 returns {:error, error} with valid params", %{customer: c} do
+    assert {:error, %Error{} = e} = Customer.create_shipping_contact(c.id, %{})
+    assert e.object == "error"
+    assert e.type == "parameter_validation_error"
+  end
+
+  test "update_shipping_contact/3 returns {:ok, source} with valid params", %{customer: c} do
+    shp_id = c.shipping_contacts.data |> Enum.at(0) |> Map.get(:id)
+    attrs = %{phone: "+55555555555555", receiver: "luis"}
+    assert {:ok, %ShippingContact{} = shp} = Customer.update_shipping_contact(c.id, shp_id, attrs)
+    assert shp.phone == "+55555555555555"
+    assert shp.receiver == "luis"
+  end
+
+  test "update_shipping_contact/3 returns {:error, error} with valid params", %{customer: c} do
+    assert {:error, %Error{} = e} = Customer.update_shipping_contact(c.id, "", %{})
+    assert e.object == "error"
+    assert e.type == "resource_not_found_error"
+  end
+
+  test "delete_shipping_contact/2 returns {:ok, source} with valid params", %{customer: c} do
+    shp_id = c.shipping_contacts.data |> Enum.at(0) |> Map.get(:id)
+    assert {:ok, %ShippingContact{} = shp} = Customer.delete_shipping_contact(c.id, shp_id)
+    assert shp.phone == "+52000000000000"
+    assert shp.receiver == "Mario perez"
+  end
+
+  test "delete_shipping_contact/1 returns {:error, error} with valid params", %{customer: c} do
+    assert {:error, %Error{} = e} = Customer.delete_shipping_contact(c.id, "")
+    assert e.object == "error"
+    assert e.type == "resource_not_found_error"
+  end
+
+  test "create_subscription/3 returns {:ok, subscription} with valid params", %{customer: c} do
+    plan_attrs =
+      %{
+        name: "luis-plan",
+        amount: 300,
+        currency: "MXN",
+        interval: "month",
+        frequency: 1,
+        trial_period_days: 15,
+        expiry_count: nil
+      }
+    assert {:ok, plan} = ConektaEx.Plan.create(plan_attrs)
+    assert {:ok, %Subscription{} = sub} = Customer.create_subscription(c.id, plan.id)
+    assert sub.object == "subscription"
+    assert sub.plan_id == plan.id
+  end
+
+  test "create_subscription/3 returns {:error, error} with valid params", %{customer: c} do
+    assert {:error, %Error{} = e} = Customer.create_subscription(c.id, "")
+    assert e.object == "error"
+    assert e.type == "resource_not_found_error"
+  end
+
+  test "update_subscription/3 returns {:ok, subscription} with valid params", %{customer: c} do
+    plan_attrs =
+      %{
+        name: "luis-plan",
+        amount: 300,
+        currency: "MXN",
+        interval: "month",
+        frequency: 1,
+        trial_period_days: 15,
+        expiry_count: nil
+      }
+    assert {:ok, plan0} = ConektaEx.Plan.create(plan_attrs)
+    assert {:ok, %Subscription{}} = Customer.create_subscription(c.id, plan0.id)
+    assert {:ok, plan1} = ConektaEx.Plan.create(%{plan_attrs | amount: 3000})
+    assert {:ok, %Subscription{} = sub} = Customer.update_subscription(c.id, plan1.id, plan1)
+    assert sub.object == "subscription"
+    assert sub.plan_id == plan1.id
+  end
+
+  test "update_subscription/3 returns {:error, error} with valid params", %{customer: c} do
+    assert {:error, %Error{} = e} = Customer.update_subscription(c.id, "", %{})
+    assert e.object == "error"
+    assert e.type == "resource_not_found_error"
+  end
+
+  test "pause_subscription/2 returns {:ok, subscription} with valid params", %{customer: c} do
+    plan_attrs =
+      %{
+        name: "luis-plan",
+        amount: 300,
+        currency: "MXN",
+        interval: "month",
+        frequency: 1,
+        trial_period_days: 15,
+        expiry_count: nil
+      }
+    assert {:ok, plan} = ConektaEx.Plan.create(plan_attrs)
+    assert {:ok, %Subscription{} = sub0} = Customer.create_subscription(c.id, plan.id)
+    assert {:ok, %Subscription{} = sub1} = Customer.pause_subscription(c.id, sub0.id)
+    assert sub1.status == "paused"
+  end
+
+  test "pause_subscription/2 returns {:error, error} with valid params", %{customer: c} do
+    assert {:error, %Error{} = e} = Customer.pause_subscription(c.id, "")
+    assert e.object == "error"
+    assert e.type == "resource_not_found_error"
+  end
+
+  test "resume_subscription/2 returns {:ok, subscription} with valid params", %{customer: c} do
+    plan_attrs =
+      %{
+        name: "luis-plan",
+        amount: 300,
+        currency: "MXN",
+        interval: "month",
+        frequency: 1,
+        expiry_count: nil
+      }
+    assert {:ok, plan} = ConektaEx.Plan.create(plan_attrs)
+    assert {:ok, %Subscription{} = sub0} = Customer.create_subscription(c.id, plan.id)
+    assert {:ok, %Subscription{} = sub1} = Customer.pause_subscription(c.id, sub0.id)
+    assert {:ok, %Subscription{} = sub2} = Customer.resume_subscription(c.id, sub1.id)
+    assert sub2.status == "active"
+  end
+
+  test "resume_subscription/2 returns {:error, error} with valid params", %{customer: c} do
+    assert {:error, %Error{} = e} = Customer.resume_subscription(c.id, "")
+    assert e.object == "error"
+    assert e.type == "resource_not_found_error"
+  end
+
+  test "cancel_subscription/2 returns {:ok, subscription} with valid params", %{customer: c} do
+    plan_attrs =
+      %{
+        name: "luis-plan",
+        amount: 300,
+        currency: "MXN",
+        interval: "month",
+        frequency: 1,
+        trial_period_days: 15,
+        expiry_count: nil
+      }
+    assert {:ok, plan} = ConektaEx.Plan.create(plan_attrs)
+    assert {:ok, %Subscription{} = sub0} = Customer.create_subscription(c.id, plan.id)
+    assert {:ok, %Subscription{} = sub1} = Customer.cancel_subscription(c.id, sub0.id)
+    assert sub1.status == "canceled"
+  end
+
+  test "cancel_subscription/2 returns {:error, error} with valid params", %{customer: c} do
+    assert {:error, %Error{} = e} = Customer.cancel_subscription(c.id, "")
+    assert e.object == "error"
+    assert e.type == "resource_not_found_error"
+  end
+
 end

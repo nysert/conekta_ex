@@ -39,7 +39,7 @@ defmodule ConektaEx.Order do
   def list() do
     @endpoint
     |> HTTPClient.get()
-    |> parse_list_response()
+    |> parse_response(:order_list)
   end
 
   @doc ~S"""
@@ -50,7 +50,7 @@ defmodule ConektaEx.Order do
   def next_page(struct_list, limit \\ nil) do
     struct_list
     |> StructList.request_next(limit)
-    |> parse_list_response()
+    |> parse_response(:order_list)
   end
 
   @doc ~S"""
@@ -61,7 +61,7 @@ defmodule ConektaEx.Order do
   def previous_page(struct_list, limit \\ nil) do
     struct_list
     |> StructList.request_previous(limit)
-    |> parse_list_response()
+    |> parse_response(:order_list)
   end
 
   @doc ~S"""
@@ -185,17 +185,269 @@ defmodule ConektaEx.Order do
     |> parse_response()
   end
 
-  defp parse_response({:error, res}), do: {:error, res}
+  @doc ~S"""
+  Creates a line item for an order with order_id
+
+  ## Examples
+
+      iex> create_line_item(order_id, ok_attrs)
+      {:ok, %ConektaEx.LineItem{}}
+
+      iex> create_line_item(order_id, bad_attrs)
+      {:error, %ConektaEx.Error{}}
+  """
+  def create_line_item(order_id, attrs)
+      when is_binary(order_id) and is_map(attrs) do
+    body = Poison.encode!(attrs)
+
+    "#{@endpoint}/#{order_id}/line_items"
+    |> HTTPClient.post(body)
+    |> parse_response(:line_item)
+  end
+
+  @doc ~S"""
+  Updates a line item for an order with order_id and line_id
+
+  ## Examples
+
+      iex> update_line_item(order_id, line_id, ok_attrs)
+      {:ok, %ConektaEx.LineItem{}}
+
+      iex> update_line_item(order_id, line_id, bad_attrs)
+      {:error, %ConektaEx.Error{}}
+  """
+  def update_line_item(order_id, line_id, attrs)
+      when is_binary(order_id) and is_binary(line_id) and is_map(attrs) do
+    body = Poison.encode!(attrs)
+
+    "#{@endpoint}/#{order_id}/line_items/#{line_id}"
+    |> HTTPClient.put(body)
+    |> parse_response(:line_item)
+  end
+
+  @doc ~S"""
+  Deletes a line item for an order with order_id and line_id
+
+  ## Examples
+
+      iex> delete_line_item(order_id, line_id)
+      {:ok, %ConektaEx.LineItem{}}
+
+      iex> delete_line_item(order_id, bad_line_id)
+      {:error, %ConektaEx.Error{}}
+  """
+  def delete_line_item(order_id, line_id)
+      when is_binary(order_id) and is_binary(line_id) do
+    "#{@endpoint}/#{order_id}/line_items/#{line_id}"
+    |> HTTPClient.delete()
+    |> parse_response(:line_item)
+  end
+
+  @doc ~S"""
+  Creates a shipping line for an order with order_id
+
+  ## Examples
+
+      iex> create_shipping_line(order_id, ok_attrs)
+      {:ok, %ConektaEx.ShippingLine{}}
+
+      iex> create_shipping_line(order_id, bad_attrs)
+      {:error, %ConektaEx.Error{}}
+  """
+  def create_shipping_line(order_id, attrs)
+      when is_binary(order_id) and is_map(attrs) do
+    body = Poison.encode!(attrs)
+
+    "#{@endpoint}/#{order_id}/shipping_lines"
+    |> HTTPClient.post(body)
+    |> parse_response(:shipping_line)
+  end
+
+  @doc ~S"""
+  Updates a shipping line for an order with order_id and line_id
+
+  ## Examples
+
+      iex> update_shipping_line(order_id, line_id, ok_attrs)
+      {:ok, %ConektaEx.ShippingLine{}}
+
+      iex> update_shipping_line(order_id, line_id, bad_attrs)
+      {:error, %ConektaEx.Error{}}
+  """
+  def update_shipping_line(order_id, line_id, attrs)
+      when is_binary(order_id) and is_binary(line_id) and is_map(attrs) do
+    body = Poison.encode!(attrs)
+
+    "#{@endpoint}/#{order_id}/shipping_lines/#{line_id}"
+    |> HTTPClient.put(body)
+    |> parse_response(:shipping_line)
+  end
+
+  @doc ~S"""
+  Deletes a shipping line for an order with order_id and line_id
+
+  ## Examples
+
+      iex> delete_shipping_line(order_id, line_id)
+      {:ok, %ConektaEx.ShippingLine{}}
+
+      iex> delete_shipping_line(order_id, bad_line_id)
+      {:error, %ConektaEx.Error{}}
+  """
+  def delete_shipping_line(order_id, line_id)
+      when is_binary(order_id) and is_binary(line_id) do
+    "#{@endpoint}/#{order_id}/shipping_lines/#{line_id}"
+    |> HTTPClient.delete()
+    |> parse_response(:shipping_line)
+  end
+
+  @doc ~S"""
+  Creates a discount line for an order with order_id
+
+  ## Examples
+
+      iex> create_discount_line(order_id, ok_attrs)
+      {:ok, %ConektaEx.DiscountLine{}}
+
+      iex> create_discount_line(order_id, bad_attrs)
+      {:error, %ConektaEx.Error{}}
+  """
+  def create_discount_line(order_id, attrs)
+      when is_binary(order_id) and is_map(attrs) do
+    body = Poison.encode!(attrs)
+
+    "#{@endpoint}/#{order_id}/discount_lines"
+    |> HTTPClient.post(body)
+    |> parse_response(:discount_line)
+  end
+
+  @doc ~S"""
+  Updates a discount line for an order with order_id and line_id
+
+  ## Examples
+
+      iex> update_discount_line(order_id, line_id, ok_attrs)
+      {:ok, %ConektaEx.DiscountLine{}}
+
+      iex> update_discount_line(order_id, line_id, bad_attrs)
+      {:error, %ConektaEx.Error{}}
+  """
+  def update_discount_line(order_id, line_id, attrs)
+      when is_binary(order_id) and is_binary(line_id) and is_map(attrs) do
+    body = Poison.encode!(attrs)
+
+    "#{@endpoint}/#{order_id}/discount_lines/#{line_id}"
+    |> HTTPClient.put(body)
+    |> parse_response(:discount_line)
+  end
+
+  @doc ~S"""
+  Deletes a discount line for an order with order_id and line_id
+
+  ## Examples
+
+      iex> delete_discount_line(order_id, line_id)
+      {:ok, %ConektaEx.DiscountLine{}}
+
+      iex> delete_discount_line(order_id, bad_line_id)
+      {:error, %ConektaEx.Error{}}
+  """
+  def delete_discount_line(order_id, line_id)
+      when is_binary(order_id) and is_binary(line_id) do
+    "#{@endpoint}/#{order_id}/discount_lines/#{line_id}"
+    |> HTTPClient.delete()
+    |> parse_response(:discount_line)
+  end
+
+  @doc ~S"""
+  Creates a tax line for an order with order_id
+
+  ## Examples
+
+      iex> create_tax_line(order_id, ok_attrs)
+      {:ok, %ConektaEx.TaxLine{}}
+
+      iex> create_tax_line(order_id, bad_attrs)
+      {:error, %ConektaEx.Error{}}
+  """
+  def create_tax_line(order_id, attrs)
+      when is_binary(order_id) and is_map(attrs) do
+    body = Poison.encode!(attrs)
+
+    "#{@endpoint}/#{order_id}/tax_lines"
+    |> HTTPClient.post(body)
+    |> parse_response(:tax_line)
+  end
+
+  @doc ~S"""
+  Updates a tax line for an order with order_id and line_id
+
+  ## Examples
+
+      iex> update_tax_line(order_id, line_id, ok_attrs)
+      {:ok, %ConektaEx.TaxLine{}}
+
+      iex> update_tax_line(order_id, line_id, bad_attrs)
+      {:error, %ConektaEx.Error{}}
+  """
+  def update_tax_line(order_id, line_id, attrs)
+      when is_binary(order_id) and is_binary(line_id) and is_map(attrs) do
+    body = Poison.encode!(attrs)
+
+    "#{@endpoint}/#{order_id}/tax_lines/#{line_id}"
+    |> HTTPClient.put(body)
+    |> parse_response(:tax_line)
+  end
+
+  @doc ~S"""
+  Deletes a tax line for an order with order_id and line_id
+
+  ## Examples
+
+      iex> delete_tax_line(order_id, line_id)
+      {:ok, %ConektaEx.TaxLine{}}
+
+      iex> delete_tax_line(order_id, bad_line_id)
+      {:error, %ConektaEx.Error{}}
+  """
+  def delete_tax_line(order_id, line_id)
+      when is_binary(order_id) and is_binary(line_id) do
+    "#{@endpoint}/#{order_id}/tax_lines/#{line_id}"
+    |> HTTPClient.delete()
+    |> parse_response(:tax_line)
+  end
+
+  defp parse_response({:error, res}) do
+    {:error, res}
+  end
 
   defp parse_response({:ok, res}) do
     {:ok, Poison.decode!(res.body, as: response())}
   end
 
-  defp parse_list_response({:error, res}), do: {:error, res}
+  defp parse_response({:error, res}, _) do
+    {:error, res}
+  end
 
-  defp parse_list_response({:ok, res}) do
-    res_struct = %StructList{data: [response()]}
-    {:ok, Poison.decode!(res.body, as: res_struct)}
+  defp parse_response({:ok, res}, :order_list) do
+    struct = %StructList{data: [response()]}
+    {:ok, Poison.decode!(res.body, as: struct)}
+  end
+
+  defp parse_response({:ok, res}, :line_item) do
+    {:ok, Poison.decode!(res.body, as: %LineItem{})}
+  end
+
+  defp parse_response({:ok, res}, :shipping_line) do
+    {:ok, Poison.decode!(res.body, as: %ShippingLine{})}
+  end
+
+  defp parse_response({:ok, res}, :discount_line) do
+    {:ok, Poison.decode!(res.body, as: %DiscountLine{})}
+  end
+
+  defp parse_response({:ok, res}, :tax_line) do
+    {:ok, Poison.decode!(res.body, as: %TaxLine{})}
   end
 
   defp response() do
