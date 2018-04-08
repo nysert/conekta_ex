@@ -29,7 +29,7 @@ ConektaEx.X.SUBMODEL_FN #Customer.create_source, Order.create_charge
 Returns `{:ok, %ConektaEx.X{}}` when everything goes ok.
 Returns `{:error, %ConektaEx.Error{}}` when the api returns an error.
 `raise` on request error (bad request, timeout) all functions have an opts
-param to change timeout `opts = [timeout: 8_000, recv_timeout: 5_000] #defaults`.
+param to change timeout `opts = [timeout: 15_000, recv_timeout: 15_000] #defaults`.
 
 
 ## Webhooks

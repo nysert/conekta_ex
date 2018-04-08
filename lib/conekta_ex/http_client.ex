@@ -20,6 +20,13 @@ defmodule ConektaEx.HTTPClient do
   def request(method, endpoint, body, opts) do
     url = "#{@base}#{endpoint}"
     headers = req_headers()
+
+    opts =
+      case opts do
+        [] -> [timeout: 15_000, recv_timeout: 15_000]
+        os -> os
+      end
+
     res = HTTPoison.request(method, url, body, headers, opts)
     handle_response(res)
   end
