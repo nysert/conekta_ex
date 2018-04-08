@@ -116,10 +116,12 @@ defmodule ConektaEx.OrderTest do
   test "create_charge/1 returns {:ok, %Order{}} with valid attrs" do
     assert {:ok, customer} = Customer.create(@customer_attrs)
     customer_info = Map.put(%{}, :customer_id, customer.id)
+
     order_attrs =
       @valid_params
       |> Map.put(:customer_info, customer_info)
       |> Map.delete(:charges)
+
     assert {:ok, %Order{} = o} = Order.create(order_attrs)
 
     attrs = %{payment_method: %{type: "card", token_id: "tok_test_visa_4242"}}

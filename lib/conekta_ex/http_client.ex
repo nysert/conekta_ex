@@ -56,7 +56,7 @@ defmodule ConektaEx.HTTPClient do
         key from 'https://admin.conekta.com/settings/keys' then
         add it to your config file:
 
-          config :conekta_ex, private_key: "private_key"
+          config :conekta_ex, :private_key, "private_key"
         """
 
       p_key ->

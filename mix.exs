@@ -7,7 +7,18 @@ defmodule ConektaEx.MixProject do
       version: "0.1.0",
       elixir: "~> 1.4",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      description: "Conekta API Client for Elixir",
+      package: package()
+    ]
+  end
+
+  def package do
+    [
+      name: "conekta_ex",
+      maintainers: ["nysertxs"],
+      licenses: ["MIT"],
+      links: %{github: "https://github.com/nysertxs/conekta_ex"}
     ]
   end
 
