@@ -27,9 +27,9 @@ defmodule ConektaEx.Customer do
   @doc ~S"""
   Retrieves a list of customers.
   """
-  def list() do
+  def list(opts \\ []) do
     @endpoint
-    |> HTTPClient.get()
+    |> HTTPClient.get(opts)
     |> parse_response(:customer_list)
   end
 
@@ -38,9 +38,9 @@ defmodule ConektaEx.Customer do
   ConektaEx.Customer.
   See 'ConectaEx.StructList.request_next/2' for examples.
   """
-  def next_page(struct_list, limit \\ nil) do
+  def next_page(struct_list, limit \\ nil, opts \\ []) do
     struct_list
-    |> StructList.request_next(limit)
+    |> StructList.request_next(limit, opts)
     |> parse_response(:customer_list)
   end
 
@@ -49,9 +49,9 @@ defmodule ConektaEx.Customer do
   ConektaEx.Customer.
   See 'ConectaEx.StructList.request_previous/2' for examples.
   """
-  def previous_page(struct_list, limit \\ nil) do
+  def previous_page(struct_list, limit \\ nil, opts \\ []) do
     struct_list
-    |> StructList.request_previous(limit)
+    |> StructList.request_previous(limit, opts)
     |> parse_response(:customer_list)
   end
 
@@ -66,9 +66,9 @@ defmodule ConektaEx.Customer do
       iex> retrieve(bad_customer_id)
       {:error, %ConektaEx.Error{}}
   """
-  def retrieve(customer_id) do
+  def retrieve(customer_id, opts \\ []) do
     "#{@endpoint}/#{customer_id}"
-    |> HTTPClient.get()
+    |> HTTPClient.get(opts)
     |> parse_response()
   end
 
@@ -83,11 +83,11 @@ defmodule ConektaEx.Customer do
       iex> create(%{email: bad_email})
       {:error, %ConektaEx.Error{}}
   """
-  def create(attrs) when is_map(attrs) do
+  def create(attrs, opts \\ []) when is_map(attrs) do
     body = Poison.encode!(attrs)
 
     @endpoint
-    |> HTTPClient.post(body)
+    |> HTTPClient.post(body, opts)
     |> parse_response()
   end
 
@@ -102,12 +102,12 @@ defmodule ConektaEx.Customer do
       iex> update(bad_customer_id, ok_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def update(customer_id, attrs)
+  def update(customer_id, attrs, opts \\ [])
       when is_binary(customer_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
     "#{@endpoint}/#{customer_id}"
-    |> HTTPClient.put(body)
+    |> HTTPClient.put(body, opts)
     |> parse_response()
   end
 
@@ -122,9 +122,9 @@ defmodule ConektaEx.Customer do
       iex> delete(bad_customer_id)
       {:error, %ConektaEx.Error{}}
   """
-  def delete(customer_id) when is_binary(customer_id) do
+  def delete(customer_id, opts \\ []) when is_binary(customer_id) do
     "#{@endpoint}/#{customer_id}"
-    |> HTTPClient.delete()
+    |> HTTPClient.delete(opts)
     |> parse_response()
   end
 
@@ -139,12 +139,12 @@ defmodule ConektaEx.Customer do
       iex> create_payment_source(customer_id, "card", bad_token)
       {:error, %ConektaEx.Error{}}
   """
-  def create_payment_source(customer_id, type, token_id)
+  def create_payment_source(customer_id, type, token_id, opts \\ [])
       when is_binary(customer_id) do
     body = Poison.encode!(%{type: type, token_id: token_id})
 
     "#{@endpoint}/#{customer_id}/payment_sources/"
-    |> HTTPClient.post(body)
+    |> HTTPClient.post(body, opts)
     |> parse_response(:payment_source)
   end
 
@@ -159,12 +159,12 @@ defmodule ConektaEx.Customer do
       iex> update_payment_source(customer_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def update_payment_source(customer_id, source_id, attrs)
+  def update_payment_source(customer_id, source_id, attrs, opts \\ [])
       when is_binary(customer_id) and is_binary(source_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
     "#{@endpoint}/#{customer_id}/payment_sources/#{source_id}"
-    |> HTTPClient.put(body)
+    |> HTTPClient.put(body, opts)
     |> parse_response(:payment_source)
   end
 
@@ -179,10 +179,10 @@ defmodule ConektaEx.Customer do
       iex> delete(customer_id, bad_source_id)
       {:error, %ConektaEx.Error{}}
   """
-  def delete_payment_source(customer_id, source_id)
+  def delete_payment_source(customer_id, source_id, opts \\ [])
       when is_binary(customer_id) and is_binary(source_id) do
     "#{@endpoint}/#{customer_id}/payment_sources/#{source_id}"
-    |> HTTPClient.delete()
+    |> HTTPClient.delete(opts)
     |> parse_response(:payment_source)
   end
 
@@ -197,12 +197,12 @@ defmodule ConektaEx.Customer do
       iex> create_shipping_contact(customer_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def create_shipping_contact(customer_id, attrs)
+  def create_shipping_contact(customer_id, attrs, opts \\ [])
       when is_binary(customer_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
     "#{@endpoint}/#{customer_id}/shipping_contacts"
-    |> HTTPClient.post(body)
+    |> HTTPClient.post(body, opts)
     |> parse_response(:shipping_contact)
   end
 
@@ -216,12 +216,12 @@ defmodule ConektaEx.Customer do
       iex> update_shipping_contact(customer_id, contact_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def update_shipping_contact(customer_id, contact_id, attrs)
+  def update_shipping_contact(customer_id, contact_id, attrs, opts \\ [])
       when is_binary(customer_id) and is_binary(contact_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
     "#{@endpoint}/#{customer_id}/shipping_contacts/#{contact_id}"
-    |> HTTPClient.put(body)
+    |> HTTPClient.put(body, opts)
     |> parse_response(:shipping_contact)
   end
 
@@ -236,10 +236,10 @@ defmodule ConektaEx.Customer do
       iex> delete_shipping_contact(customer_id, bad_line_id)
       {:error, %ConektaEx.Error{}}
   """
-  def delete_shipping_contact(customer_id, contact_id)
+  def delete_shipping_contact(customer_id, contact_id, opts \\ [])
       when is_binary(customer_id) and is_binary(contact_id) do
     "#{@endpoint}/#{customer_id}/shipping_contacts/#{contact_id}"
-    |> HTTPClient.delete()
+    |> HTTPClient.delete(opts)
     |> parse_response(:shipping_contact)
   end
 
@@ -255,7 +255,7 @@ defmodule ConektaEx.Customer do
       iex> create_subscription(customer_id, bad_plan_id)
       {:error, %ConektaEx.Error{}}
   """
-  def create_subscription(customer_id, plan_id, card_id \\ nil)
+  def create_subscription(customer_id, plan_id, card_id \\ nil, opts \\ [])
       when is_binary(customer_id) and is_binary(plan_id) do
     body =
       case card_id do
@@ -266,7 +266,7 @@ defmodule ConektaEx.Customer do
       |> Poison.encode!()
 
     "#{@endpoint}/#{customer_id}/subscription"
-    |> HTTPClient.post(body)
+    |> HTTPClient.post(body, opts)
     |> parse_response(:subscription)
   end
 
@@ -282,7 +282,7 @@ defmodule ConektaEx.Customer do
       iex> update_subscription(customer_id, plan_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def update_subscription(customer_id, plan_id, card_id \\ nil)
+  def update_subscription(customer_id, plan_id, card_id \\ nil, opts \\ [])
       when is_binary(customer_id) and is_binary(plan_id) do
     body =
       case card_id do
@@ -293,7 +293,7 @@ defmodule ConektaEx.Customer do
       |> Poison.encode!()
 
     "#{@endpoint}/#{customer_id}/subscription"
-    |> HTTPClient.put(body)
+    |> HTTPClient.put(body, opts)
     |> parse_response(:subscription)
   end
 
@@ -308,12 +308,12 @@ defmodule ConektaEx.Customer do
       iex> pause_subscription(customer_id, bad_subscription_id)
       {:error, %ConektaEx.Error{}}
   """
-  def pause_subscription(customer_id, subscription_id)
+  def pause_subscription(customer_id, subscription_id, opts \\ [])
       when is_binary(customer_id) and is_binary(subscription_id) do
     body = Poison.encode!(%{id: subscription_id})
 
     "#{@endpoint}/#{customer_id}/subscription/pause"
-    |> HTTPClient.post(body)
+    |> HTTPClient.post(body, opts)
     |> parse_response(:subscription)
   end
 
@@ -328,12 +328,12 @@ defmodule ConektaEx.Customer do
       iex> resume_subscription(customer_id, bad_subscription_id)
       {:error, %ConektaEx.Error{}}
   """
-  def resume_subscription(customer_id, subscription_id)
+  def resume_subscription(customer_id, subscription_id, opts \\ [])
       when is_binary(customer_id) and is_binary(subscription_id) do
     body = Poison.encode!(%{id: subscription_id})
 
     "#{@endpoint}/#{customer_id}/subscription/resume"
-    |> HTTPClient.post(body)
+    |> HTTPClient.post(body, opts)
     |> parse_response(:subscription)
   end
 
@@ -348,12 +348,12 @@ defmodule ConektaEx.Customer do
       iex> cancel_subscription(customer_id, bad_subscription_id)
       {:error, %ConektaEx.Error{}}
   """
-  def cancel_subscription(customer_id, subscription_id)
+  def cancel_subscription(customer_id, subscription_id, opts \\ [])
       when is_binary(customer_id) and is_binary(subscription_id) do
     body = Poison.encode!(%{id: subscription_id})
 
     "#{@endpoint}/#{customer_id}/subscription/cancel"
-    |> HTTPClient.post(body)
+    |> HTTPClient.post(body, opts)
     |> parse_response(:subscription)
   end
 

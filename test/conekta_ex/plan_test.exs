@@ -42,10 +42,9 @@ defmodule ConektaEx.PlanTest do
   end
 
   test "next_page/2 returns {:error, %HTTPoison.Error{}} with invalid url" do
-    assert {:error, %HTTPoison.Error{} = err} =
-             Plan.previous_page(%StructList{next_page_url: nil}, 1)
-
-    assert err.reason == :nxdomain
+    assert_raise RuntimeError, "request error, nxdomain", fn ->
+      Plan.previous_page(%StructList{next_page_url: ""}, 1)
+    end
   end
 
   test "next_page/2 returns {:error, %ConektaEx.Error{}} with invalid limit" do
@@ -66,10 +65,9 @@ defmodule ConektaEx.PlanTest do
   end
 
   test "previous_page/2 returns {:error, %HTTPoison.Error{}} with invalid url" do
-    assert {:error, %HTTPoison.Error{} = err} =
-             Plan.previous_page(%StructList{previous_page_url: nil}, 1)
-
-    assert err.reason == :nxdomain
+    assert_raise RuntimeError, "request error, nxdomain", fn ->
+      Plan.previous_page(%StructList{previous_page_url: ""}, 1)
+    end
   end
 
   test "previous_page/2 returns {:error, %ConektaEx.Error{}} with invalid limit" do

@@ -1,26 +1,26 @@
 defmodule ConektaEx.HTTPClient do
   @base "https://api.conekta.io"
 
-  def get(endpoint, headers \\ []) do
-    request(:get, endpoint, "", headers)
+  def get(endpoint, opts) do
+    request(:get, endpoint, "", opts)
   end
 
-  def post(endpoint, body, headers \\ []) do
-    request(:post, endpoint, body, headers)
+  def post(endpoint, body, opts) do
+    request(:post, endpoint, body, opts)
   end
 
-  def put(endpoint, body, headers \\ []) do
-    request(:put, endpoint, body, headers)
+  def put(endpoint, body, opts) do
+    request(:put, endpoint, body, opts)
   end
 
-  def delete(endpoint, headers \\ []) do
-    request(:delete, endpoint, "", headers)
+  def delete(endpoint, opts) do
+    request(:delete, endpoint, "", opts)
   end
 
-  def request(method, endpoint, body, headers) do
+  def request(method, endpoint, body, opts) do
     url = "#{@base}#{endpoint}"
-    headers = req_headers(headers)
-    res = HTTPoison.request(method, url, body, headers)
+    headers = req_headers()
+    res = HTTPoison.request(method, url, body, headers, opts)
     handle_response(res)
   end
 
@@ -34,20 +34,18 @@ defmodule ConektaEx.HTTPClient do
     end
   end
 
-  def handle_response({:error, resp}) do
-    {:error, resp}
+  def handle_response({:error, err}) do
+    raise "request error, #{err.reason}"
   end
 
-  defp req_headers(extra_headers) do
-    b_auth = Base.encode64(private_key())
+  defp req_headers() do
+    b_auth = "Basic #{Base.encode64(private_key())}"
 
-    base_headers = [
+    [
       {"Accept", "application/vnd.conekta-v2.0.0+json"},
       {"Content-type", "application/json"},
-      {"Authorization", "Basic #{b_auth}"}
+      {"Authorization", b_auth}
     ]
-
-    base_headers ++ extra_headers
   end
 
   defp private_key do

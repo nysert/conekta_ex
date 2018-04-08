@@ -3,6 +3,7 @@ defmodule ConektaEx.StructList do
 
   @moduledoc ~S"""
   Struct for Conekta representation of lists.
+  [Pagination](https://developers.conekta.com/api#pagination)
   """
 
   defstruct [
@@ -27,13 +28,13 @@ defmodule ConektaEx.StructList do
       # this response means either Conekta returned a
       # bad url or is not returning one at all in this
       # case check 'has_more' first.
-      iex> request_next(struct_list_with_bad_url, 1)
-      {:error, %HTTPoison.Error{}}
+      iex> request_next(struct_list_with_nil_url, 1)
+      raise "request error, nxdomain"
   """
-  def request_next(%__MODULE__{next_page_url: url}, limit) do
+  def request_next(%__MODULE__{next_page_url: url}, limit, opts) do
     url
     |> create_pagination_url(limit)
-    |> HTTPClient.get()
+    |> HTTPClient.get(opts)
   end
 
   @doc ~S"""
@@ -49,13 +50,13 @@ defmodule ConektaEx.StructList do
       # this response means either Conekta returned a
       # bad url or is not returning one at all in this
       # case check 'has_more' first.
-      iex> request_previous(struct_list_with_bad_url, 1)
-      {:error, %HTTPoison.Error{}}
+      iex> request_previous(struct_list_with_nil_url, 1)
+      raise "request error, nxdomain"
   """
-  def request_previous(%__MODULE__{previous_page_url: url}, limit) do
+  def request_previous(%__MODULE__{previous_page_url: url}, limit, opts) do
     url
     |> create_pagination_url(limit)
-    |> HTTPClient.get()
+    |> HTTPClient.get(opts)
   end
 
   defp create_pagination_url(url, limit) do

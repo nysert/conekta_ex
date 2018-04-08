@@ -36,9 +36,9 @@ defmodule ConektaEx.Order do
   @doc ~S"""
   Retrieves a list of orders.
   """
-  def list() do
+  def list(opts \\ []) do
     @endpoint
-    |> HTTPClient.get()
+    |> HTTPClient.get(opts)
     |> parse_response(:order_list)
   end
 
@@ -47,9 +47,9 @@ defmodule ConektaEx.Order do
   ConektaEx.Order.
   See 'ConectaEx.StructList.request_next/2' for examples.
   """
-  def next_page(struct_list, limit \\ nil) do
+  def next_page(struct_list, limit \\ nil, opts \\ []) do
     struct_list
-    |> StructList.request_next(limit)
+    |> StructList.request_next(limit, opts)
     |> parse_response(:order_list)
   end
 
@@ -58,9 +58,9 @@ defmodule ConektaEx.Order do
   ConektaEx.Order.
   See 'ConectaEx.StructList.request_previous/2' for examples.
   """
-  def previous_page(struct_list, limit \\ nil) do
+  def previous_page(struct_list, limit \\ nil, opts \\ []) do
     struct_list
-    |> StructList.request_previous(limit)
+    |> StructList.request_previous(limit, opts)
     |> parse_response(:order_list)
   end
 
@@ -75,9 +75,9 @@ defmodule ConektaEx.Order do
       iex> retrieve(bad_order_id)
       {:error, %ConektaEx.Error{}}
   """
-  def retrieve(order_id) do
+  def retrieve(order_id, opts \\ []) do
     "#{@endpoint}/#{order_id}"
-    |> HTTPClient.get()
+    |> HTTPClient.get(opts)
     |> parse_response()
   end
 
@@ -92,11 +92,11 @@ defmodule ConektaEx.Order do
       iex> create(%{email: bad_email})
       {:error, %ConektaEx.Error{}}
   """
-  def create(attrs) when is_map(attrs) do
+  def create(attrs, opts \\ []) when is_map(attrs) do
     body = Poison.encode!(attrs)
 
     @endpoint
-    |> HTTPClient.post(body)
+    |> HTTPClient.post(body, opts)
     |> parse_response()
   end
 
@@ -111,12 +111,12 @@ defmodule ConektaEx.Order do
       iex> update(bad_order_id, ok_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def update(order_id, attrs)
+  def update(order_id, attrs, opts \\ [])
       when is_binary(order_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
-    "#{@endpoint}/#{order_id}/charges"
-    |> HTTPClient.put(body)
+    "#{@endpoint}/#{order_id}"
+    |> HTTPClient.put(body, opts)
     |> parse_response()
   end
 
@@ -131,9 +131,9 @@ defmodule ConektaEx.Order do
       iex> capture(bad_order_id)
       {:error, %ConektaEx.Error{}}
   """
-  def capture(order_id) when is_binary(order_id) do
+  def capture(order_id, opts \\ []) when is_binary(order_id) do
     "#{@endpoint}/#{order_id}/capture"
-    |> HTTPClient.post("")
+    |> HTTPClient.post("", opts)
     |> parse_response()
   end
 
@@ -149,7 +149,7 @@ defmodule ConektaEx.Order do
       iex> refund(bad_order_id, "ugh")
       {:error, %ConektaEx.Error{}}
   """
-  def refund(order_id, reason, amount \\ nil)
+  def refund(order_id, reason, amount \\ nil, opts \\ [])
       when is_binary(order_id) do
     body =
       amount
@@ -161,7 +161,7 @@ defmodule ConektaEx.Order do
       |> Poison.encode!()
 
     "#{@endpoint}/#{order_id}/refunds"
-    |> HTTPClient.post(body)
+    |> HTTPClient.post(body, opts)
     |> parse_response()
   end
 
@@ -170,19 +170,19 @@ defmodule ConektaEx.Order do
 
   ## Examples
 
-      iex> refund(order_id, ok_attrs)
-      {:ok, %ConektaEx.Order{}}
+      iex> create_charge(order_id, ok_attrs)
+      {:ok, %ConektaEx.Charge{}}
 
-      iex> refund(order_id, bad_attrs)
+      iex> create_charge(order_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def create_charge(order_id, attrs)
+  def create_charge(order_id, attrs, opts \\ [])
       when is_binary(order_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
-    "#{@endpoint}/#{order_id}/refunds"
-    |> HTTPClient.post(body)
-    |> parse_response()
+    "#{@endpoint}/#{order_id}/charges"
+    |> HTTPClient.post(body, opts)
+    |> parse_response(:charge)
   end
 
   @doc ~S"""
@@ -196,12 +196,12 @@ defmodule ConektaEx.Order do
       iex> create_line_item(order_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def create_line_item(order_id, attrs)
+  def create_line_item(order_id, attrs, opts \\ [])
       when is_binary(order_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
     "#{@endpoint}/#{order_id}/line_items"
-    |> HTTPClient.post(body)
+    |> HTTPClient.post(body, opts)
     |> parse_response(:line_item)
   end
 
@@ -216,12 +216,12 @@ defmodule ConektaEx.Order do
       iex> update_line_item(order_id, line_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def update_line_item(order_id, line_id, attrs)
+  def update_line_item(order_id, line_id, attrs, opts \\ [])
       when is_binary(order_id) and is_binary(line_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
     "#{@endpoint}/#{order_id}/line_items/#{line_id}"
-    |> HTTPClient.put(body)
+    |> HTTPClient.put(body, opts)
     |> parse_response(:line_item)
   end
 
@@ -236,10 +236,10 @@ defmodule ConektaEx.Order do
       iex> delete_line_item(order_id, bad_line_id)
       {:error, %ConektaEx.Error{}}
   """
-  def delete_line_item(order_id, line_id)
+  def delete_line_item(order_id, line_id, opts \\ [])
       when is_binary(order_id) and is_binary(line_id) do
     "#{@endpoint}/#{order_id}/line_items/#{line_id}"
-    |> HTTPClient.delete()
+    |> HTTPClient.delete(opts)
     |> parse_response(:line_item)
   end
 
@@ -254,12 +254,12 @@ defmodule ConektaEx.Order do
       iex> create_shipping_line(order_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def create_shipping_line(order_id, attrs)
+  def create_shipping_line(order_id, attrs, opts \\ [])
       when is_binary(order_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
     "#{@endpoint}/#{order_id}/shipping_lines"
-    |> HTTPClient.post(body)
+    |> HTTPClient.post(body, opts)
     |> parse_response(:shipping_line)
   end
 
@@ -274,12 +274,12 @@ defmodule ConektaEx.Order do
       iex> update_shipping_line(order_id, line_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def update_shipping_line(order_id, line_id, attrs)
+  def update_shipping_line(order_id, line_id, attrs, opts \\ [])
       when is_binary(order_id) and is_binary(line_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
     "#{@endpoint}/#{order_id}/shipping_lines/#{line_id}"
-    |> HTTPClient.put(body)
+    |> HTTPClient.put(body, opts)
     |> parse_response(:shipping_line)
   end
 
@@ -294,10 +294,10 @@ defmodule ConektaEx.Order do
       iex> delete_shipping_line(order_id, bad_line_id)
       {:error, %ConektaEx.Error{}}
   """
-  def delete_shipping_line(order_id, line_id)
+  def delete_shipping_line(order_id, line_id, opts \\ [])
       when is_binary(order_id) and is_binary(line_id) do
     "#{@endpoint}/#{order_id}/shipping_lines/#{line_id}"
-    |> HTTPClient.delete()
+    |> HTTPClient.delete(opts)
     |> parse_response(:shipping_line)
   end
 
@@ -312,12 +312,12 @@ defmodule ConektaEx.Order do
       iex> create_discount_line(order_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def create_discount_line(order_id, attrs)
+  def create_discount_line(order_id, attrs, opts \\ [])
       when is_binary(order_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
     "#{@endpoint}/#{order_id}/discount_lines"
-    |> HTTPClient.post(body)
+    |> HTTPClient.post(body, opts)
     |> parse_response(:discount_line)
   end
 
@@ -332,12 +332,12 @@ defmodule ConektaEx.Order do
       iex> update_discount_line(order_id, line_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def update_discount_line(order_id, line_id, attrs)
+  def update_discount_line(order_id, line_id, attrs, opts \\ [])
       when is_binary(order_id) and is_binary(line_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
     "#{@endpoint}/#{order_id}/discount_lines/#{line_id}"
-    |> HTTPClient.put(body)
+    |> HTTPClient.put(body, opts)
     |> parse_response(:discount_line)
   end
 
@@ -352,10 +352,10 @@ defmodule ConektaEx.Order do
       iex> delete_discount_line(order_id, bad_line_id)
       {:error, %ConektaEx.Error{}}
   """
-  def delete_discount_line(order_id, line_id)
+  def delete_discount_line(order_id, line_id, opts \\ [])
       when is_binary(order_id) and is_binary(line_id) do
     "#{@endpoint}/#{order_id}/discount_lines/#{line_id}"
-    |> HTTPClient.delete()
+    |> HTTPClient.delete(opts)
     |> parse_response(:discount_line)
   end
 
@@ -370,12 +370,12 @@ defmodule ConektaEx.Order do
       iex> create_tax_line(order_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def create_tax_line(order_id, attrs)
+  def create_tax_line(order_id, attrs, opts \\ [])
       when is_binary(order_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
     "#{@endpoint}/#{order_id}/tax_lines"
-    |> HTTPClient.post(body)
+    |> HTTPClient.post(body, opts)
     |> parse_response(:tax_line)
   end
 
@@ -390,12 +390,12 @@ defmodule ConektaEx.Order do
       iex> update_tax_line(order_id, line_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def update_tax_line(order_id, line_id, attrs)
+  def update_tax_line(order_id, line_id, attrs, opts \\ [])
       when is_binary(order_id) and is_binary(line_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
     "#{@endpoint}/#{order_id}/tax_lines/#{line_id}"
-    |> HTTPClient.put(body)
+    |> HTTPClient.put(body, opts)
     |> parse_response(:tax_line)
   end
 
@@ -410,10 +410,10 @@ defmodule ConektaEx.Order do
       iex> delete_tax_line(order_id, bad_line_id)
       {:error, %ConektaEx.Error{}}
   """
-  def delete_tax_line(order_id, line_id)
+  def delete_tax_line(order_id, line_id, opts \\ [])
       when is_binary(order_id) and is_binary(line_id) do
     "#{@endpoint}/#{order_id}/tax_lines/#{line_id}"
-    |> HTTPClient.delete()
+    |> HTTPClient.delete(opts)
     |> parse_response(:tax_line)
   end
 
@@ -427,6 +427,11 @@ defmodule ConektaEx.Order do
 
   defp parse_response({:error, res}, _) do
     {:error, res}
+  end
+
+  defp parse_response({:ok, res}, :charge) do
+    struct = %Charge{payment_method: %PaymentSource{}}
+    {:ok, Poison.decode!(res.body, as: struct)}
   end
 
   defp parse_response({:ok, res}, :order_list) do

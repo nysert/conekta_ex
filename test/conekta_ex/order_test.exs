@@ -1,6 +1,6 @@
 defmodule ConektaEx.OrderTest do
   use ExUnit.Case
-  alias ConektaEx.{Error, Order, StructList, Customer}
+  alias ConektaEx.{Error, Order, StructList, Customer, Charge}
 
   @customer_attrs %{
     name: "cus",
@@ -55,10 +55,9 @@ defmodule ConektaEx.OrderTest do
   end
 
   test "next_page/2 returns {:error, %HTTPoison.Error{}} with invalid url" do
-    assert {:error, %HTTPoison.Error{} = err} =
-             Order.previous_page(%StructList{next_page_url: nil}, 1)
-
-    assert err.reason == :nxdomain
+    assert_raise RuntimeError, "request error, nxdomain", fn ->
+      Order.previous_page(%StructList{next_page_url: nil}, 1)
+    end
   end
 
   test "next_page/2 returns {:error, %ConektaEx.Error{}} with invalid limit" do
@@ -79,10 +78,9 @@ defmodule ConektaEx.OrderTest do
   end
 
   test "previous_page/2 returns {:error, %HTTPoison.Error{}} with invalid url" do
-    assert {:error, %HTTPoison.Error{} = err} =
-             Order.previous_page(%StructList{previous_page_url: nil}, 1)
-
-    assert err.reason == :nxdomain
+    assert_raise RuntimeError, "request error, nxdomain", fn ->
+      Order.previous_page(%StructList{previous_page_url: nil}, 1)
+    end
   end
 
   test "previous_page/2 returns {:error, %ConektaEx.Error{}} with invalid limit" do
@@ -115,12 +113,22 @@ defmodule ConektaEx.OrderTest do
     assert {:error, %Error{}} = Order.create(@invalid_params)
   end
 
-  test "create_charge/1 returns {:ok, %Order{}} with valid attrs", %{order: o} do
+  test "create_charge/1 returns {:ok, %Order{}} with valid attrs" do
+    assert {:ok, customer} = Customer.create(@customer_attrs)
+    customer_info = Map.put(%{}, :customer_id, customer.id)
+    order_attrs =
+      @valid_params
+      |> Map.put(:customer_info, customer_info)
+      |> Map.delete(:charges)
+    assert {:ok, %Order{} = o} = Order.create(order_attrs)
+
     attrs = %{payment_method: %{type: "card", token_id: "tok_test_visa_4242"}}
-    assert {:ok, %Order{}} = Order.create_charge(o.id, attrs)
+    assert {:ok, %Charge{} = c} = Order.create_charge(o.id, attrs)
+    assert c.object == "charge"
+    assert c.status == "paid"
   end
 
-  test "create_charge/1 returns {:eror, %Error{}} with invalid attrs" do
+  test "create_charge/1 returns {:error, %Error{}} with invalid attrs" do
     attrs = %{payment_method: %{type: "card", token_id: "tok_test_visa_4242"}}
     assert {:error, %Error{} = e} = Order.create_charge("", attrs)
     assert e.object == "error"

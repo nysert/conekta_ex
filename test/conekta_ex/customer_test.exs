@@ -64,10 +64,9 @@ defmodule ConektaEx.CustomerTest do
   end
 
   test "next_page/2 returns {:error, %HTTPoison.Error{}} with invalid url" do
-    assert {:error, %HTTPoison.Error{} = err} =
-             Customer.previous_page(%StructList{next_page_url: nil}, 1)
-
-    assert err.reason == :nxdomain
+    assert_raise RuntimeError, "request error, nxdomain", fn ->
+      Customer.previous_page(%StructList{next_page_url: ""}, 1)
+    end
   end
 
   test "next_page/2 returns {:error, %ConektaEx.Error{}} with invalid limit" do
@@ -88,10 +87,9 @@ defmodule ConektaEx.CustomerTest do
   end
 
   test "previous_page/2 returns {:error, %HTTPoison.Error{}} with invalid url" do
-    assert {:error, %HTTPoison.Error{} = err} =
-             Customer.previous_page(%StructList{previous_page_url: nil}, 1)
-
-    assert err.reason == :nxdomain
+    assert_raise RuntimeError, "request error, nxdomain", fn ->
+      Customer.previous_page(%StructList{previous_page_url: ""}, 1)
+    end
   end
 
   test "previous_page/2 returns {:error, %ConektaEx.Error{}} with invalid limit" do
@@ -235,16 +233,16 @@ defmodule ConektaEx.CustomerTest do
   end
 
   test "create_subscription/3 returns {:ok, subscription} with valid params", %{customer: c} do
-    plan_attrs =
-      %{
-        name: "luis-plan",
-        amount: 300,
-        currency: "MXN",
-        interval: "month",
-        frequency: 1,
-        trial_period_days: 15,
-        expiry_count: nil
-      }
+    plan_attrs = %{
+      name: "luis-plan",
+      amount: 300,
+      currency: "MXN",
+      interval: "month",
+      frequency: 1,
+      trial_period_days: 15,
+      expiry_count: nil
+    }
+
     assert {:ok, plan} = ConektaEx.Plan.create(plan_attrs)
     assert {:ok, %Subscription{} = sub} = Customer.create_subscription(c.id, plan.id)
     assert sub.object == "subscription"
@@ -258,16 +256,16 @@ defmodule ConektaEx.CustomerTest do
   end
 
   test "update_subscription/3 returns {:ok, subscription} with valid params", %{customer: c} do
-    plan_attrs =
-      %{
-        name: "luis-plan",
-        amount: 300,
-        currency: "MXN",
-        interval: "month",
-        frequency: 1,
-        trial_period_days: 15,
-        expiry_count: nil
-      }
+    plan_attrs = %{
+      name: "luis-plan",
+      amount: 300,
+      currency: "MXN",
+      interval: "month",
+      frequency: 1,
+      trial_period_days: 15,
+      expiry_count: nil
+    }
+
     assert {:ok, plan0} = ConektaEx.Plan.create(plan_attrs)
     assert {:ok, %Subscription{}} = Customer.create_subscription(c.id, plan0.id)
     assert {:ok, plan1} = ConektaEx.Plan.create(%{plan_attrs | amount: 3000})
@@ -283,16 +281,16 @@ defmodule ConektaEx.CustomerTest do
   end
 
   test "pause_subscription/2 returns {:ok, subscription} with valid params", %{customer: c} do
-    plan_attrs =
-      %{
-        name: "luis-plan",
-        amount: 300,
-        currency: "MXN",
-        interval: "month",
-        frequency: 1,
-        trial_period_days: 15,
-        expiry_count: nil
-      }
+    plan_attrs = %{
+      name: "luis-plan",
+      amount: 300,
+      currency: "MXN",
+      interval: "month",
+      frequency: 1,
+      trial_period_days: 15,
+      expiry_count: nil
+    }
+
     assert {:ok, plan} = ConektaEx.Plan.create(plan_attrs)
     assert {:ok, %Subscription{} = sub0} = Customer.create_subscription(c.id, plan.id)
     assert {:ok, %Subscription{} = sub1} = Customer.pause_subscription(c.id, sub0.id)
@@ -306,15 +304,15 @@ defmodule ConektaEx.CustomerTest do
   end
 
   test "resume_subscription/2 returns {:ok, subscription} with valid params", %{customer: c} do
-    plan_attrs =
-      %{
-        name: "luis-plan",
-        amount: 300,
-        currency: "MXN",
-        interval: "month",
-        frequency: 1,
-        expiry_count: nil
-      }
+    plan_attrs = %{
+      name: "luis-plan",
+      amount: 300,
+      currency: "MXN",
+      interval: "month",
+      frequency: 1,
+      expiry_count: nil
+    }
+
     assert {:ok, plan} = ConektaEx.Plan.create(plan_attrs)
     assert {:ok, %Subscription{} = sub0} = Customer.create_subscription(c.id, plan.id)
     assert {:ok, %Subscription{} = sub1} = Customer.pause_subscription(c.id, sub0.id)
@@ -329,16 +327,16 @@ defmodule ConektaEx.CustomerTest do
   end
 
   test "cancel_subscription/2 returns {:ok, subscription} with valid params", %{customer: c} do
-    plan_attrs =
-      %{
-        name: "luis-plan",
-        amount: 300,
-        currency: "MXN",
-        interval: "month",
-        frequency: 1,
-        trial_period_days: 15,
-        expiry_count: nil
-      }
+    plan_attrs = %{
+      name: "luis-plan",
+      amount: 300,
+      currency: "MXN",
+      interval: "month",
+      frequency: 1,
+      trial_period_days: 15,
+      expiry_count: nil
+    }
+
     assert {:ok, plan} = ConektaEx.Plan.create(plan_attrs)
     assert {:ok, %Subscription{} = sub0} = Customer.create_subscription(c.id, plan.id)
     assert {:ok, %Subscription{} = sub1} = Customer.cancel_subscription(c.id, sub0.id)
@@ -350,5 +348,4 @@ defmodule ConektaEx.CustomerTest do
     assert e.object == "error"
     assert e.type == "resource_not_found_error"
   end
-
 end

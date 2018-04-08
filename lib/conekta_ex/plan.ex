@@ -21,10 +21,10 @@ defmodule ConektaEx.Plan do
   @doc ~S"""
   Retrieves a list of plans.
   """
-  def list() do
+  def list(opts \\ []) do
     @endpoint
-    |> HTTPClient.get()
-    |> parse_list_response()
+    |> HTTPClient.get(opts)
+    |> parse_response(:plan_list)
   end
 
   @doc ~S"""
@@ -32,10 +32,10 @@ defmodule ConektaEx.Plan do
   ConektaEx.Plan.
   See 'ConectaEx.StructList.request_next/2' for examples.
   """
-  def next_page(struct_list, limit \\ nil) do
+  def next_page(struct_list, limit \\ nil, opts \\ []) do
     struct_list
-    |> StructList.request_next(limit)
-    |> parse_list_response()
+    |> StructList.request_next(limit, opts)
+    |> parse_response(:plan_list)
   end
 
   @doc ~S"""
@@ -43,10 +43,10 @@ defmodule ConektaEx.Plan do
   ConektaEx.Plan.
   See 'ConectaEx.StructList.request_previous/2' for examples.
   """
-  def previous_page(struct_list, limit \\ nil) do
+  def previous_page(struct_list, limit \\ nil, opts \\ []) do
     struct_list
-    |> StructList.request_previous(limit)
-    |> parse_list_response()
+    |> StructList.request_previous(limit, opts)
+    |> parse_response(:plan_list)
   end
 
   @doc ~S"""
@@ -60,9 +60,9 @@ defmodule ConektaEx.Plan do
       iex> retrieve(bad_plan_id)
       {:error, %ConektaEx.Error{}}
   """
-  def retrieve(plan_id) do
+  def retrieve(plan_id, opts \\ []) do
     "#{@endpoint}/#{plan_id}"
-    |> HTTPClient.get()
+    |> HTTPClient.get(opts)
     |> parse_response()
   end
 
@@ -77,11 +77,11 @@ defmodule ConektaEx.Plan do
       iex> create(map_with_bad_params)
       {:error, %ConektaEx.Error{}}
   """
-  def create(attrs) when is_map(attrs) do
+  def create(attrs, opts \\ []) when is_map(attrs) do
     body = Poison.encode!(attrs)
 
     @endpoint
-    |> HTTPClient.post(body)
+    |> HTTPClient.post(body, opts)
     |> parse_response()
   end
 
@@ -96,12 +96,12 @@ defmodule ConektaEx.Plan do
       iex> update(bad_plan_id, ok_attrs)
       {:error, %ConektaEx.Error{}}
   """
-  def update(plan_id, attrs)
+  def update(plan_id, attrs, opts \\ [])
       when is_binary(plan_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
 
     "#{@endpoint}/#{plan_id}"
-    |> HTTPClient.put(body)
+    |> HTTPClient.put(body, opts)
     |> parse_response()
   end
 
@@ -116,9 +116,9 @@ defmodule ConektaEx.Plan do
       iex> delete(bad_plan_id)
       {:error, %ConektaEx.Error{}}
   """
-  def delete(plan_id) when is_binary(plan_id) do
+  def delete(plan_id, opts \\ []) when is_binary(plan_id) do
     "#{@endpoint}/#{plan_id}"
-    |> HTTPClient.delete()
+    |> HTTPClient.delete(opts)
     |> parse_response()
   end
 
@@ -128,9 +128,9 @@ defmodule ConektaEx.Plan do
     {:ok, Poison.decode!(res.body, as: response())}
   end
 
-  defp parse_list_response({:error, res}), do: {:error, res}
+  defp parse_response({:error, res}, _), do: {:error, res}
 
-  defp parse_list_response({:ok, res}) do
+  defp parse_response({:ok, res}, :plan_list) do
     res_struct = %StructList{data: [response()]}
     {:ok, Poison.decode!(res.body, as: res_struct)}
   end
