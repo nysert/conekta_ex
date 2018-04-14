@@ -66,7 +66,7 @@ defmodule ConektaEx.Customer do
       iex> retrieve(bad_customer_id)
       {:error, %ConektaEx.Error{}}
   """
-  def retrieve(customer_id, opts \\ []) do
+  def retrieve(customer_id, opts \\ []) when is_binary(customer_id) do
     "#{@endpoint}/#{customer_id}"
     |> HTTPClient.get(opts)
     |> parse_response()
