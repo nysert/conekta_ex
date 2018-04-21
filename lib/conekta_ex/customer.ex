@@ -134,7 +134,7 @@ defmodule ConektaEx.Customer do
   ## Examples
 
       iex> create_payment_source(customer_id, "card", ok_token)
-      {:ok, %ConektaEx.Customer{}}
+      {:ok, %ConektaEx.PaymentSource{}}
 
       iex> create_payment_source(customer_id, "card", bad_token)
       {:error, %ConektaEx.Error{}}
@@ -154,7 +154,7 @@ defmodule ConektaEx.Customer do
   ## Examples
 
       iex> update_payment_source(customer_id, ok_attrs)
-      {:ok, %ConektaEx.Customer{}}
+      {:ok, %ConektaEx.PaymentSource{}}
 
       iex> update_payment_source(customer_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
@@ -174,7 +174,7 @@ defmodule ConektaEx.Customer do
   ## Examples
 
       iex> delete(customer_id, ok_source_id)
-      {:ok, %ConektaEx.Customer{}}
+      {:ok, %ConektaEx.PaymentSource{}}
 
       iex> delete(customer_id, bad_source_id)
       {:error, %ConektaEx.Error{}}
