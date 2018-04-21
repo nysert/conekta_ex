@@ -9,22 +9,30 @@ defmodule ConektaEx.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       description: "Conekta API Client for Elixir",
-      package: package()
-    ]
-  end
-
-  def package do
-    [
-      name: "conekta_ex",
-      maintainers: ["nysertxs"],
-      licenses: ["MIT"],
-      links: %{github: "https://github.com/nysertxs/conekta_ex"}
+      package: package(),
+      docs: docs()
     ]
   end
 
   def application do
     [
       applications: [:logger, :httpoison]
+    ]
+  end
+
+  defp package do
+    [
+      name: "conekta_ex",
+      maintainers: ["nysertxs"],
+      licenses: ["MIT"],
+      links: %{github: "https://github.com/nysertxs/conekta_ex"},
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      extras: ["README.md"]
     ]
   end
 
