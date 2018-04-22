@@ -1,33 +1,29 @@
 defmodule ConektaEx.HTTPClient do
   @base "https://api.conekta.io"
 
-  def get(endpoint, opts) do
-    request(:get, endpoint, "", opts)
+  def get(endpoint) do
+    request(:get, endpoint, "")
   end
 
-  def post(endpoint, body, opts) do
-    request(:post, endpoint, body, opts)
+  def post(endpoint, body) do
+    request(:post, endpoint, body)
   end
 
-  def put(endpoint, body, opts) do
-    request(:put, endpoint, body, opts)
+  def put(endpoint, body) do
+    request(:put, endpoint, body)
   end
 
-  def delete(endpoint, opts) do
-    request(:delete, endpoint, "", opts)
+  def delete(endpoint) do
+    request(:delete, endpoint, "")
   end
 
-  def request(method, endpoint, body, opts) do
+  def request(method, endpoint, body) do
     url = "#{@base}#{endpoint}"
     headers = req_headers()
-
-    opts =
-      case opts do
-        [] -> [timeout: 15_000, recv_timeout: 15_000]
-        os -> os
-      end
+    opts = req_options()
 
     res = HTTPoison.request(method, url, body, headers, opts)
+
     handle_response(res)
   end
 
@@ -53,6 +49,12 @@ defmodule ConektaEx.HTTPClient do
       {"Content-type", "application/json"},
       {"Authorization", b_auth}
     ]
+  end
+
+  defp req_options() do
+    timeout = Application.get_env(:conekta_ex, :timeout) || 15_000
+    recv_timeout = Application.get_env(:conekta_ex, :recv_timeout) || 15_000
+    [timeout: timeout, recv_timeout: recv_timeout]
   end
 
   defp private_key do

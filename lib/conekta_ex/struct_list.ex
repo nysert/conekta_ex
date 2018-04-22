@@ -31,10 +31,10 @@ defmodule ConektaEx.StructList do
       iex> request_next(struct_list_with_nil_url, 1)
       raise "request error, nxdomain"
   """
-  def request_next(%__MODULE__{next_page_url: url}, limit, opts) do
+  def request_next(%__MODULE__{next_page_url: url}, limit) do
     url
     |> create_pagination_url(limit)
-    |> HTTPClient.get(opts)
+    |> HTTPClient.get()
   end
 
   @doc ~S"""
@@ -53,10 +53,10 @@ defmodule ConektaEx.StructList do
       iex> request_previous(struct_list_with_nil_url, 1)
       raise "request error, nxdomain"
   """
-  def request_previous(%__MODULE__{previous_page_url: url}, limit, opts) do
+  def request_previous(%__MODULE__{previous_page_url: url}, limit) do
     url
     |> create_pagination_url(limit)
-    |> HTTPClient.get(opts)
+    |> HTTPClient.get()
   end
 
   defp create_pagination_url(url, limit) do
