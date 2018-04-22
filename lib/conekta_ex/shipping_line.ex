@@ -1,4 +1,6 @@
 defmodule ConektaEx.ShippingLine do
+  @type t :: %__MODULE__{}
+
   defstruct [
     :id,
     :amount,

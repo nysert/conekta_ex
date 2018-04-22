@@ -8,6 +8,8 @@ defmodule ConektaEx.Customer do
 
   @endpoint "/customers"
 
+  @type t :: %__MODULE__{}
+
   defstruct [
     :id,
     :name,
@@ -27,6 +29,7 @@ defmodule ConektaEx.Customer do
   @doc ~S"""
   Retrieves a list of customers.
   """
+  @spec list() :: {:ok, ConektaEx.StructList.t()} | {:error, ConektaEx.Error.t()}
   def list() do
     @endpoint
     |> HTTPClient.get()
@@ -36,8 +39,10 @@ defmodule ConektaEx.Customer do
   @doc ~S"""
   Gets a ConektaEx.StructList with 'data' as a list of
   ConektaEx.Customer.
-  See 'ConectaEx.StructList.request_next/2' for examples.
+  See `ConektaEx.StructList.request_next/2` for examples.
   """
+  @spec next_page(ConektaEx.StructList.t(), any()) ::
+          {:ok, ConektaEx.StructList.t()} | {:error, ConektaEx.Error.t()}
   def next_page(struct_list, limit \\ nil) do
     struct_list
     |> StructList.request_next(limit)
@@ -47,8 +52,10 @@ defmodule ConektaEx.Customer do
   @doc ~S"""
   Gets a ConektaEx.StructList with 'data' as a list of
   ConektaEx.Customer.
-  See 'ConectaEx.StructList.request_previous/2' for examples.
+  See `ConektaEx.StructList.request_previous/2` for examples.
   """
+  @spec previous_page(ConektaEx.StructList.t(), any()) ::
+          {:ok, ConektaEx.StructList.t()} | {:error, ConektaEx.Error.t()}
   def previous_page(struct_list, limit \\ nil) do
     struct_list
     |> StructList.request_previous(limit)
@@ -65,7 +72,9 @@ defmodule ConektaEx.Customer do
 
       iex> retrieve(bad_customer_id)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec retrieve(binary()) :: {:ok, t} | {:error, ConektaEx.Error.t()}
   def retrieve(customer_id) when is_binary(customer_id) do
     "#{@endpoint}/#{customer_id}"
     |> HTTPClient.get()
@@ -82,7 +91,9 @@ defmodule ConektaEx.Customer do
 
       iex> create(%{email: bad_email})
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec create(map()) :: {:ok, t} | {:error, ConektaEx.Error.t()}
   def create(attrs) when is_map(attrs) do
     body = Poison.encode!(attrs)
 
@@ -101,7 +112,9 @@ defmodule ConektaEx.Customer do
 
       iex> update(bad_customer_id, ok_attrs)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec update(binary(), map()) :: {:ok, t} | {:error, ConektaEx.Error.t()}
   def update(customer_id, attrs)
       when is_binary(customer_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
@@ -121,7 +134,9 @@ defmodule ConektaEx.Customer do
 
       iex> delete(bad_customer_id)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec delete(binary()) :: {:ok, t} | {:error, ConektaEx.Error.t()}
   def delete(customer_id) when is_binary(customer_id) do
     "#{@endpoint}/#{customer_id}"
     |> HTTPClient.delete()
@@ -138,7 +153,10 @@ defmodule ConektaEx.Customer do
 
       iex> create_payment_source(customer_id, "card", bad_token)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec create_payment_source(binary(), any(), any()) ::
+          {:ok, ConektaEx.PaymentSource.t()} | {:error, ConektaEx.Error.t()}
   def create_payment_source(customer_id, type, token_id)
       when is_binary(customer_id) do
     body = Poison.encode!(%{type: type, token_id: token_id})
@@ -158,7 +176,10 @@ defmodule ConektaEx.Customer do
 
       iex> update_payment_source(customer_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec update_payment_source(binary(), binary(), map()) ::
+          {:ok, ConektaEx.PaymentSource.t()} | {:error, ConektaEx.Error.t()}
   def update_payment_source(customer_id, source_id, attrs)
       when is_binary(customer_id) and is_binary(source_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
@@ -178,7 +199,10 @@ defmodule ConektaEx.Customer do
 
       iex> delete(customer_id, bad_source_id)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec delete_payment_source(binary(), binary()) ::
+          {:ok, ConektaEx.PaymentSource.t()} | {:error, ConektaEx.Error.t()}
   def delete_payment_source(customer_id, source_id)
       when is_binary(customer_id) and is_binary(source_id) do
     "#{@endpoint}/#{customer_id}/payment_sources/#{source_id}"
@@ -196,7 +220,10 @@ defmodule ConektaEx.Customer do
 
       iex> create_shipping_contact(customer_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec create_shipping_contact(binary(), map()) ::
+          {:ok, ConektaEx.ShippingContact.t()} | {:error, ConektaEx.Error.t()}
   def create_shipping_contact(customer_id, attrs)
       when is_binary(customer_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
@@ -215,7 +242,10 @@ defmodule ConektaEx.Customer do
 
       iex> update_shipping_contact(customer_id, contact_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec update_shipping_contact(binary(), binary(), map()) ::
+          {:ok, ConektaEx.ShippingContact.t()} | {:error, ConektaEx.Error.t()}
   def update_shipping_contact(customer_id, contact_id, attrs)
       when is_binary(customer_id) and is_binary(contact_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
@@ -235,7 +265,10 @@ defmodule ConektaEx.Customer do
 
       iex> delete_shipping_contact(customer_id, bad_line_id)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec delete_shipping_contact(binary(), binary()) ::
+          {:ok, ConektaEx.ShippingContact.t()} | {:error, ConektaEx.Error.t()}
   def delete_shipping_contact(customer_id, contact_id)
       when is_binary(customer_id) and is_binary(contact_id) do
     "#{@endpoint}/#{customer_id}/shipping_contacts/#{contact_id}"
@@ -254,7 +287,10 @@ defmodule ConektaEx.Customer do
 
       iex> create_subscription(customer_id, bad_plan_id)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec create_subscription(binary(), binary(), binary() | nil) ::
+          {:ok, ConektaEx.Subscription.t()} | {:error, ConektaEx.Error.t()}
   def create_subscription(customer_id, plan_id, card_id \\ nil)
       when is_binary(customer_id) and is_binary(plan_id) do
     body =
@@ -281,7 +317,10 @@ defmodule ConektaEx.Customer do
 
       iex> update_subscription(customer_id, plan_id, bad_attrs)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec update_subscription(binary(), binary(), binary() | nil) ::
+          {:ok, ConektaEx.Subscription.t()} | {:error, ConektaEx.Error.t()}
   def update_subscription(customer_id, plan_id, card_id \\ nil)
       when is_binary(customer_id) and is_binary(plan_id) do
     body =
@@ -307,7 +346,10 @@ defmodule ConektaEx.Customer do
 
       iex> pause_subscription(customer_id, bad_subscription_id)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec pause_subscription(binary(), binary()) ::
+          {:ok, ConektaEx.Subscription.t()} | {:error, ConektaEx.Error.t()}
   def pause_subscription(customer_id, subscription_id)
       when is_binary(customer_id) and is_binary(subscription_id) do
     body = Poison.encode!(%{id: subscription_id})
@@ -327,7 +369,10 @@ defmodule ConektaEx.Customer do
 
       iex> resume_subscription(customer_id, bad_subscription_id)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec resume_subscription(binary(), binary()) ::
+          {:ok, ConektaEx.Subscription.t()} | {:error, ConektaEx.Error.t()}
   def resume_subscription(customer_id, subscription_id)
       when is_binary(customer_id) and is_binary(subscription_id) do
     body = Poison.encode!(%{id: subscription_id})
@@ -347,7 +392,10 @@ defmodule ConektaEx.Customer do
 
       iex> cancel_subscription(customer_id, bad_subscription_id)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec cancel_subscription(binary(), binary()) ::
+          {:ok, ConektaEx.Subscription.t()} | {:error, ConektaEx.Error.t()}
   def cancel_subscription(customer_id, subscription_id)
       when is_binary(customer_id) and is_binary(subscription_id) do
     body = Poison.encode!(%{id: subscription_id})

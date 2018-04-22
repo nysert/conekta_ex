@@ -1,6 +1,8 @@
 defmodule ConektaEx.Error do
   alias ConektaEx.ErrorDetail
 
+  @type t :: %__MODULE__{}
+
   defstruct [
     :type,
     :log_id,

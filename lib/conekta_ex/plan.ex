@@ -4,6 +4,8 @@ defmodule ConektaEx.Plan do
 
   @endpoint "/plans"
 
+  @type t :: %__MODULE__{}
+
   defstruct [
     :id,
     :object,
@@ -21,6 +23,7 @@ defmodule ConektaEx.Plan do
   @doc ~S"""
   Retrieves a list of plans.
   """
+  @spec list() :: {:ok, ConektaEx.StructList.t()} | {:error, ConektaEx.Error.t()}
   def list() do
     @endpoint
     |> HTTPClient.get()
@@ -30,8 +33,10 @@ defmodule ConektaEx.Plan do
   @doc ~S"""
   Gets a ConektaEx.StructList with 'data' as a list of
   ConektaEx.Plan.
-  See 'ConectaEx.StructList.request_next/2' for examples.
+  See `ConektaEx.StructList.request_next/2` for examples.
   """
+  @spec next_page(ConektaEx.StructList.t(), any()) ::
+          {:ok, ConektaEx.StructList.t()} | {:error, ConektaEx.Error.t()}
   def next_page(struct_list, limit \\ nil) do
     struct_list
     |> StructList.request_next(limit)
@@ -41,8 +46,10 @@ defmodule ConektaEx.Plan do
   @doc ~S"""
   Gets a ConektaEx.StructList with 'data' as a list of
   ConektaEx.Plan.
-  See 'ConectaEx.StructList.request_previous/2' for examples.
+  See `ConektaEx.StructList.request_previous/2` for examples.
   """
+  @spec previous_page(ConektaEx.StructList.t(), any()) ::
+          {:ok, ConektaEx.StructList.t()} | {:error, ConektaEx.Error.t()}
   def previous_page(struct_list, limit \\ nil) do
     struct_list
     |> StructList.request_previous(limit)
@@ -59,8 +66,10 @@ defmodule ConektaEx.Plan do
 
       iex> retrieve(bad_plan_id)
       {:error, %ConektaEx.Error{}}
+
   """
-  def retrieve(plan_id) do
+  @spec retrieve(binary()) :: {:ok, t} | {:error, ConektaEx.Error.t()}
+  def retrieve(plan_id) when is_binary(plan_id) do
     "#{@endpoint}/#{plan_id}"
     |> HTTPClient.get()
     |> parse_response()
@@ -76,7 +85,9 @@ defmodule ConektaEx.Plan do
 
       iex> create(map_with_bad_params)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec create(map()) :: {:ok, t} | {:error, ConektaEx.Error.t()}
   def create(attrs) when is_map(attrs) do
     body = Poison.encode!(attrs)
 
@@ -95,7 +106,9 @@ defmodule ConektaEx.Plan do
 
       iex> update(bad_plan_id, ok_attrs)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec update(binary(), map()) :: {:ok, t} | {:error, ConektaEx.Error.t()}
   def update(plan_id, attrs)
       when is_binary(plan_id) and is_map(attrs) do
     body = Poison.encode!(attrs)
@@ -115,7 +128,9 @@ defmodule ConektaEx.Plan do
 
       iex> delete(bad_plan_id)
       {:error, %ConektaEx.Error{}}
+
   """
+  @spec delete(binary()) :: {:ok, t} | {:error, ConektaEx.Error.t()}
   def delete(plan_id) when is_binary(plan_id) do
     "#{@endpoint}/#{plan_id}"
     |> HTTPClient.delete()

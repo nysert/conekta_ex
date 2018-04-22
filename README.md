@@ -145,7 +145,7 @@ Other endpoints unlisted in the api docs without list/next/previous function (PR
 `/customers/:id/shipping_contacts`, `/orders/:id/discount_lines`,
 `/orders/:id/tax_lines`.
 
-## Webhooks
+### Webhooks
 When using webhooks, you will have to handle different event `type`s.
 ```elixir
 {:ok, event} = ConektaEx.Event.decode(json)

@@ -1,4 +1,6 @@
 defmodule ConektaEx.Subscription do
+  @type t :: %__MODULE__{}
+
   defstruct [
     :id,
     :object,

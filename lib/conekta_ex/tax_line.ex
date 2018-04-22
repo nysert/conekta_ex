@@ -1,4 +1,6 @@
 defmodule ConektaEx.TaxLine do
+  @type t :: %__MODULE__{}
+
   defstruct [
     :id,
     :description,

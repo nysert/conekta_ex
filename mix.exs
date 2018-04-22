@@ -25,7 +25,7 @@ defmodule ConektaEx.MixProject do
       name: "conekta_ex",
       maintainers: ["nysertxs"],
       licenses: ["MIT"],
-      links: %{github: "https://github.com/nysertxs/conekta_ex"},
+      links: %{github: "https://github.com/nysertxs/conekta_ex"}
     ]
   end
 

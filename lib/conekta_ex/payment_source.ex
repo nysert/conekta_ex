@@ -1,4 +1,6 @@
 defmodule ConektaEx.PaymentSource do
+  @type t :: %__MODULE__{}
+
   defstruct [
     :id,
     :object,

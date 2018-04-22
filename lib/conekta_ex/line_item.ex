@@ -1,4 +1,6 @@
 defmodule ConektaEx.LineItem do
+  @type t :: %__MODULE__{}
+
   defstruct [
     :id,
     :name,
