@@ -8,7 +8,7 @@ Conekta API Client for Elixir
 ```elixir
 def deps do
   [
-    {:conekta_ex, "~> 0.1.0"}
+    {:conekta_ex, "~> 1.0.0"}
   ]
 end
 ```
@@ -16,6 +16,12 @@ end
   2. Add your `private_key` to your config file
 ```elixir
 config :conekta_ex, :private_key, "PRIVATE_KEY"
+
+# Optional Config
+## timeout to establish a connection, in milliseconds, Default 15_000
+config :conekta_ex, :timeout, 10_000
+## recv_timeout used when receiving a connection. Default is 15_000
+config :conekta_ex, :recv_timeout, 10_000
 ```
 
 ## Usage
