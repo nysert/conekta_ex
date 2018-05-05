@@ -134,7 +134,7 @@ plan_attrs =
 ```
 
 ### Pagination
-Conekta uses a Struct to represent List of Objects, wich i named StructList :v,
+Conekta uses a Struct to represent List of Objects, which i named StructList :v,
 i found some endpoints that the api docs doesn't have, like, `/customers`,
 `/orders`, `/plans`, So if you need to list those use ConektaEx.STRUCT.list, and
 ConektaEx.STRUCT.next_page and ConektaEx.STRUCT.previous_page.
