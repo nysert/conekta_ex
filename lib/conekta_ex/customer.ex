@@ -144,6 +144,47 @@ defmodule ConektaEx.Customer do
   end
 
   @doc ~S"""
+  Lists customer payment sources
+
+  ## Examples
+
+      iex> list_payment_sources(ok_customer_id)
+      {:ok, %ConektaEx.StructList{}}
+
+      iex> list_payment_sources(bad_customer_id)
+      {:error, %ConektaEx.Error{}}
+
+  """
+  @spec list_payment_sources(binary()) ::
+          {:ok, ConektaEx.StructList.t()} | {:error, ConektaEx.Error.t()}
+  def list_payment_sources(customer_id) when is_binary(customer_id) do
+    "#{@endpoint}/#{customer_id}/payment_sources"
+    |> HTTPClient.get()
+    |> parse_response(:payment_sources)
+  end
+
+  @doc ~S"""
+  Retrieves a customer payment source by source_id
+
+  ## Examples
+
+      iex> retrieve_payment_source(ok_customer_id, ok_source_id)
+      {:ok, %ConektaEx.PaymentSource{}}
+
+      iex> retrieve_payment_source(ok_customer_id, bad_source_id)
+      {:error, %ConektaEx.Error{}}
+
+  """
+  @spec retrieve_payment_source(binary(), binary()) ::
+          {:ok, ConektaEx.PaymentSource.t()} | {:error, ConektaEx.Error.t()}
+  def retrieve_payment_source(customer_id, source_id)
+      when is_binary(customer_id) and is_binary(source_id) do
+    "#{@endpoint}/#{customer_id}/payment_sources/#{source_id}"
+    |> HTTPClient.get()
+    |> parse_response(:payment_source)
+  end
+
+  @doc ~S"""
   Creates a payment source for a customer with a customer_id.
 
   ## Examples
@@ -433,6 +474,11 @@ defmodule ConektaEx.Customer do
 
   defp parse_response({:ok, res}, :subscription) do
     {:ok, Poison.decode!(res.body, as: %Subscription{})}
+  end
+
+  defp parse_response({:ok, res}, :payment_sources) do
+    struct = %StructList{data: [%PaymentSource{}]}
+    {:ok, Poison.decode!(res.body, as: struct)}
   end
 
   defp response() do

@@ -348,4 +348,25 @@ defmodule ConektaEx.CustomerTest do
     assert e.object == "error"
     assert e.type == "resource_not_found_error"
   end
+
+  test "list_payment_sources/2 returns {:ok, source} with valid params", %{customer: c} do
+    assert {:ok, %StructList{} = st} = Customer.list_payment_sources(c.id)
+    assert length(st.data) == 1
+    assert st.data |> Enum.at(0) |> Map.get(:id) == c.default_payment_source_id
+  end
+
+  test "list_payment_sources/2 returns {:error, e} with invalid params" do
+    assert {:error, %Error{}} = Customer.list_payment_sources("hi")
+  end
+
+  test "retrieve_payment_source/2 returns {:ok, source} with valid params", %{customer: c} do
+    assert {:ok, %PaymentSource{} = p} =
+             Customer.retrieve_payment_source(c.id, c.default_payment_source_id)
+
+    assert p.id == c.default_payment_source_id
+  end
+
+  test "retrieve_payment_source/2 returns {:error, e} with invalid params", %{customer: c} do
+    assert {:error, %Error{}} = Customer.retrieve_payment_source(c.id, "hi")
+  end
 end
