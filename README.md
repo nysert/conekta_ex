@@ -18,6 +18,8 @@ end
 config :conekta_ex, :private_key, "PRIVATE_KEY"
 
 # Optional Config
+## locale, Default "es", ref -> https://developers.conekta.com/api#locale
+config :conekta_ex, :locale, "en"
 ## timeout to establish a connection, in milliseconds, Default 15_000
 config :conekta_ex, :timeout, 10_000
 ## recv_timeout used when receiving a connection. Default is 15_000

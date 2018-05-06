@@ -46,6 +46,7 @@ defmodule ConektaEx.HTTPClient do
 
     [
       {"Accept", "application/vnd.conekta-v2.0.0+json"},
+      {"Accept-Language", locale()},
       {"Content-type", "application/json"},
       {"Authorization", b_auth}
     ]
@@ -55,6 +56,10 @@ defmodule ConektaEx.HTTPClient do
     timeout = Application.get_env(:conekta_ex, :timeout) || 15_000
     recv_timeout = Application.get_env(:conekta_ex, :recv_timeout) || 15_000
     [timeout: timeout, recv_timeout: recv_timeout]
+  end
+
+  defp locale() do
+    Application.get_env(:conekta_ex, :locale) || "es"
   end
 
   defp private_key do
