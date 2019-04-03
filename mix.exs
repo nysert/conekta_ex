@@ -4,7 +4,7 @@ defmodule ConektaEx.MixProject do
   def project do
     [
       app: :conekta_ex,
-      version: "1.0.3",
+      version: "1.1.0",
       elixir: "~> 1.4",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
