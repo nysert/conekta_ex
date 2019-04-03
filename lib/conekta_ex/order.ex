@@ -473,6 +473,34 @@ defmodule ConektaEx.Order do
     |> parse_response(:tax_line)
   end
 
+  @doc ~S"""
+  Lists Orders created by a customer_id, as in:
+  `https://admin.conekta.com/customers/CUSTOMER_ID`
+
+  ## Examples
+
+      iex> list_customer_orders(customer_id)
+      {:ok, %ConektaEx.StructList{}}
+
+      iex> list_customer_orders(bad_customer_id)
+      {:error, %ConektaEx.Error{}}
+
+  """
+  @spec list_customer_orders(binary) :: {:ok, ConektaEx.StructList.t()} | {:error, ConektaEx.Error.t()}
+  def list_customer_orders(customer_id) do
+    params =
+      %{
+        "expand[]" => "last_payment_info",
+        "customer_info.customer_id" => customer_id,
+        "limit" => 20
+      }
+    query = URI.encode_query(params)
+
+    "#{@endpoint}?#{query}"
+    |> HTTPClient.get()
+    |> parse_response(:order_list)
+  end
+
   defp parse_response({:error, res}) do
     {:error, res}
   end

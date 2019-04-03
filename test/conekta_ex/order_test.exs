@@ -37,7 +37,7 @@ defmodule ConektaEx.OrderTest do
     customer_info = Map.put(%{}, :customer_id, customer.id)
     order_attrs = Map.put(@valid_params, :customer_info, customer_info)
     assert {:ok, order} = Order.create(order_attrs)
-    {:ok, order: order}
+    {:ok, order: order, customer: customer}
   end
 
   test "list/0 returns {:ok, %StructList{}}" do
@@ -135,5 +135,15 @@ defmodule ConektaEx.OrderTest do
     assert {:error, %Error{} = e} = Order.create_charge("", attrs)
     assert e.object == "error"
     assert e.type == "parameter_validation_error"
+  end
+
+  test "list_customer_orders/1 returns {:ok, %StructList{}}", %{customer: customer, order: order} do
+    assert {:ok, %StructList{} = sl} = Order.list_customer_orders(customer.id)
+    assert sl.object == "list"
+    assert is_list(sl.data)
+    assert sl.total == 1
+    assert length(sl.data) == 1
+    ord = Enum.at(sl.data, 0)
+    assert ord.id == order.id
   end
 end
